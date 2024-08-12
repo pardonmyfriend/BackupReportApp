@@ -1,0 +1,15 @@
+[[pages]]
+path = "pages/home.py"
+name = "Home"
+icon = ":material/home:"
+
+[[pages]]
+path = "pages/upload_file.py"
+name = "Upload file"
+icon = ":material/upload:"
+
+[[pages]]
+path = "pages/params.py"
+name = "Adjust parameters"
+icon = ":material/tune:"
+url_path = "a_very_long_page_title"
