@@ -12,8 +12,8 @@ Follow these steps to install and run the application on your local machine.
 ### Clone the Repository
 
 ```
-git clone https://github.com/YourUsername/BackupReportAnalyzer.git
-cd BackupReportAnalyzer
+git clone https://github.com/pardonmyfriend/BackupReportApp.git
+cd BackupReportApp
 ```
 
 ### Create and Activate a Virtual Environment (optional but recommended)
