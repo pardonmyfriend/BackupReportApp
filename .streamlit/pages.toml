@@ -12,4 +12,8 @@ icon = ":material/upload:"
 path = "pages/params.py"
 name = "Adjust parameters"
 icon = ":material/tune:"
-url_path = "a_very_long_page_title"
+
+[[pages]]
+path = "pages/dashboard.py"
+name = "Statistics & Visualizations"
+icon = ":material/finance:"
