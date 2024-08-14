@@ -32,6 +32,9 @@ else:
             for i, job in enumerate(multiselect_job):
                 multiselect_obj = st.multiselect(f"Select machines from {job}", options=job_obj[job])
                 selected[job] = multiselect_obj
+    
+    if st.button(f'Next step: View results :material/arrow_forward_ios:' , use_container_width=True):
+            st.switch_page("pages/dashboard.py")
                 
             
 
