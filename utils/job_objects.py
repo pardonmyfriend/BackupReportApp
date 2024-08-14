@@ -1,7 +1,3 @@
-import streamlit as st
-import pandas as pd
-
-
 def get_job_objects(backups, backups_obj):
     backup_jobs = []
     backup_job_obj = {}

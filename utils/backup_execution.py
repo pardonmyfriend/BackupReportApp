@@ -1,9 +1,6 @@
 import re
 import pandas as pd
 from datetime import datetime
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
-from openpyxl.formatting.rule import FormulaRule
 import locale
 
 

@@ -2,7 +2,6 @@ import pandas as pd
 from openpyxl import load_workbook, Workbook
 from utils.formatting import format_backup, format_backup_execution
 from utils.stats import backup_stats
-from openpyxl.styles import Font, Border, PatternFill, Alignment
 import shutil
 
 

@@ -3,7 +3,7 @@ from st_pages import add_page_title, get_nav_from_toml
 
 
 def main():
-    st.set_page_config(page_title="Backup Report Analysis", page_icon="📊")
+    st.set_page_config(page_title="Backup Report Analysis", page_icon="📊", layout="wide")
 
     nav = get_nav_from_toml(".streamlit/pages.toml")
     pg = st.navigation(nav)

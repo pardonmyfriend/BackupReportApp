@@ -1,7 +1,7 @@
 import streamlit as st
-import numpy as np
-from streamlit_elements import elements, mui, dashboard
+from utils.charts import *
 import pandas as pd
+from utils.data_processing import process_data
 
 
 st.header("Statistics & Visualizations")
@@ -25,7 +25,7 @@ else:
     details_df = st.session_state['details']
     merged_counts_df = st.session_state['merged_counts']
 
-    tab_one, tab_two = st.tabs(["BACKUP DATA OVERVIEW", "BACKUP SUMMARY"])
+    tab_one, tab_two, tab_three = st.tabs(["BACKUP DATA OVERVIEW", "BACKUP SUMMARY", "BACKUP JOB ANALYTICS"])
 
     with tab_one:
         tab1, tab2, tab3, tab4, tab5 = st.tabs(["Backup Data", "Detailed Data by Object", "Last Backup Data", "Detailed Last Backup Data", "Weekly Execution Results"])
@@ -105,11 +105,11 @@ else:
 
         with col1:
             st.markdown("#### Summary of backups")
-            st.dataframe(summary_df, hide_index=True, height=393)
+            st.dataframe(summary_df, hide_index=True, height=393, use_container_width=True)
 
         with col2:
             st.markdown("#### Summary of recent backups")
-            st.dataframe(summary_recent_df, hide_index=True, height=393)
+            st.dataframe(summary_recent_df, hide_index=True, height=393, use_container_width=True)
 
         col1, col2 = st.columns([0.65, 0.35], vertical_alignment="bottom")
 
@@ -135,3 +135,41 @@ else:
                 mime="application/vnd.ms-excel",
                 use_container_width=True
             )
+
+    with tab_three:
+        backup = process_data(backup_summary_df)
+
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Backup job status", "Error rate", "Others", "Performance", "Trends", "Duration", "Gantt chart"])
+
+        with tab1:
+            status(backup)
+            status_by_backup(backup)
+        with tab2:
+            error(backup)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                error_daily(backup)
+            with col2:
+                error_hour(backup)
+
+        with tab3:
+            size(backup)
+            efficiency(backup)
+            # heatmap(backup)
+
+        with tab4:
+            perfomance(backup)
+
+        with tab5:
+            daily_trends(backup)
+            hour_trends(backup)
+
+        # with tab6:
+            # duration_hist(backup)
+            # duration_bar(backup)
+            # duration_box(backup)
+        
+        with tab7:
+            gantt(backup)
