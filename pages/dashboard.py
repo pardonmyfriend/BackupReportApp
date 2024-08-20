@@ -6,17 +6,16 @@ from utils.data_processing import process_data
 
 st.header("Statistics & Visualizations")
 
-if 'backup_summary' not in st.session_state:
+if 'backup' not in st.session_state:
     st.warning(":material/warning: Data file not uploaded yet. Please upload your data file to set parameters.")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
         st.switch_page('pages/upload_file.py')
 else:
-    backup_summary_df = st.session_state['backup_summary']
-    details_summary_df = st.session_state['details_summary']
-    backup_execution_df =  st.session_state['backup_execution']
+    backup_df = st.session_state['backup']
+    obj_df = st.session_state['obj']
     last_backup_df = st.session_state['last_backup']
-    last_backup_obj_df = st.session_state['last_backup_obj']
-    backup_execution_df = st.session_state['backup_execution']
+    last_obj_df = st.session_state['last_obj']
+    execution_df =  st.session_state['execution']
 
     summary_df = st.session_state['summary']
     summary_recent_df = st.session_state['summary_recent']
@@ -32,7 +31,7 @@ else:
 
         with tab1:
             st.markdown("#### Backup data")
-            st.dataframe(backup_summary_df)
+            st.dataframe(backup_df)
             with open("workbooks/Backup.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download backup data",
@@ -44,7 +43,7 @@ else:
 
         with tab2:
             st.markdown("#### Detailed backup data by object")
-            st.dataframe(details_summary_df)
+            st.dataframe(obj_df)
             with open("workbooks/Backup - objects.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download detailed data by object",
@@ -68,7 +67,7 @@ else:
 
         with tab4:
             st.markdown("#### Detailed last backup data by object")
-            st.dataframe(last_backup_obj_df)
+            st.dataframe(last_obj_df)
             with open("workbooks/Last backup - objects.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download detailed last backup data",
@@ -80,7 +79,7 @@ else:
 
         with tab5:
             st.markdown("#### Weekly backup job execution and results")
-            st.dataframe(backup_execution_df)
+            st.dataframe(execution_df)
             with open("workbooks/Backup execution.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download weekly execution data",
@@ -137,7 +136,7 @@ else:
             )
 
     with tab_three:
-        backup = process_data(backup_summary_df)
+        backup = process_data(backup_df)
 
         tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Backup job status", "Error rate", "Others", "Performance", "Trends", "Duration", "Gantt chart"])
 

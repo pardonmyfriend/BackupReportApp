@@ -16,18 +16,14 @@ def copy_sheet_to_new_workbook(source_workbook, sheet_name, output_path):
     source_wb = load_workbook(source_workbook)
     source_sheet = source_wb[sheet_name]
 
-    # Utwórz nowy workbook
     new_wb = Workbook()
 
-    # Usuń domyślnie dodany pusty arkusz
     default_sheet = new_wb.active
     new_wb.remove(default_sheet)
 
-    # Skopiuj arkusz
     new_sheet = new_wb.copy_worksheet(source_sheet)
     new_sheet.title = sheet_name
 
-    # Zapisz nowy plik
     new_wb.save(output_path)
 
 def save_all_sheets_as_individual_files(workbook_path, output_directory):
@@ -61,20 +57,14 @@ def create_excels(backup_summary_df, details_summary_df, last_backup_df, last_ba
     workbook = load_workbook(original_file)
 
     for sheet_name in workbook.sheetnames:
-        # Stwórz kopię pliku Excel
         new_file_name = f"workbooks/{sheet_name}.xlsx"
         shutil.copyfile(original_file, new_file_name)
         
-        # Załaduj kopię workbooka
         new_workbook = load_workbook(new_file_name)
         
-        # Usuń wszystkie arkusze oprócz bieżącego
         for name in new_workbook.sheetnames:
             if name != sheet_name:
                 std = new_workbook[name]
                 new_workbook.remove(std)
         
-        # Zapisz zmiany w nowym pliku
         new_workbook.save(new_file_name)
-
-    print("Arkusze zostały skopiowane do osobnych plików.")

@@ -3,7 +3,6 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 from openpyxl.formatting.rule import FormulaRule
 import locale
 
-
 def merge_cells(ws):
     cell_value = ws['B1']
     vm_list = [ws['C1'].value]
@@ -115,28 +114,32 @@ def format_backup():
             max_row = row
             break
 
-    backup_jobs = {}
-    for row in ws_last_obj.iter_rows(min_row=2, max_row=max_row, values_only=True):
-        job, status = row[1], row[3]
-        if job not in backup_jobs:
-            backup_jobs[job] = []
-        backup_jobs[job].append(status)
+    job_colors = []
+    for row in ws_last.iter_rows(min_row=2, max_row=max_row, values_only=True):
+        job, status = row[1], row[2]
+        if status == "Error":
+            job_colors.append((job, red_fill))
+        elif status == "Warning":
+            job_colors.append((job, orange_fill))
+        elif status == "Success":
+            job_colors.append((job, green_fill))
 
-    job_colors = {}
-    for job, statuses in backup_jobs.items():
-        if "Error" in statuses:
-            job_colors[job] = red_fill
-        elif "Warning" in statuses:
-            job_colors[job] = orange_fill
-        else:
-            job_colors[job] = green_fill
+    i = 2
+    max_row = ws_last_obj.max_row
 
-    for row in ws_last_obj.iter_rows(min_row=2, max_row=max_row):
-        date_cell = row[0]
-        job_cell = row[1]
-        if job_cell.value in job_colors:
-            job_cell.fill = job_colors[job_cell.value]
-            date_cell.fill = job_colors[job_cell.value]
+    for job, color in job_colors:
+        while i < max_row - 1:
+            row = ws_last_obj[i]
+            date_cell = row[0]
+            job_cell = row[1]
+            if job_cell.value == job:
+                date_cell.fill = color
+                job_cell.fill = color
+                job_colors = job_colors[1:]
+                break
+            else:
+                i += 1
+        i += 1
 
     workbook.save('workbooks/Backup data overview.xlsx')
 
@@ -157,20 +160,41 @@ def format_backup_execution():
     worksheet.conditional_formatting.add('C2:H' + str(worksheet.max_row), error_rule)
     worksheet.conditional_formatting.add('C2:H' + str(worksheet.max_row), warning_rule)
 
-    for col in ['A', 'B']:
-        cell_value = None
-        merge_start = 2
-        for row in range(2, worksheet.max_row + 1):
-            current_cell = worksheet[f'{col}{row}']
-            if current_cell.value == cell_value:
-                current_cell.value = None
-            else:
-                if row > merge_start:
-                    worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=row - 1, end_column=current_cell.column)
-                cell_value = current_cell.value
-                merge_start = row
-        if merge_start < worksheet.max_row:
-            worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=worksheet.max_row, end_column=current_cell.column)
+    cell_value = {'week': None, 'day': None}
+    merge_start_day = 2
+    
+    for row in range(2, worksheet.max_row + 1):
+        week_number_cell = worksheet[f'A{row}']
+        day_of_week_cell = worksheet[f'B{row}']
+        
+        if week_number_cell.value == cell_value['week'] and day_of_week_cell.value == cell_value['day']:
+            day_of_week_cell.value = None
+        else:
+            if row > merge_start_day:
+                worksheet.merge_cells(start_row=merge_start_day, start_column=2, end_row=row - 1, end_column=2)
+            
+            cell_value = {
+                'week': week_number_cell.value,
+                'day': day_of_week_cell.value
+            }
+            merge_start_day = row
+
+    if merge_start_day < worksheet.max_row:
+        worksheet.merge_cells(start_row=merge_start_day, start_column=2, end_row=worksheet.max_row, end_column=2)
+
+    cell_value = None
+    merge_start = 2
+    for row in range(2, worksheet.max_row + 1):
+        current_cell = worksheet[f'A{row}']
+        if current_cell.value == cell_value:
+            current_cell.value = None
+        else:
+            if row > merge_start:
+                worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=row - 1, end_column=current_cell.column)
+            cell_value = current_cell.value
+            merge_start = row
+    if merge_start < worksheet.max_row:
+        worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=worksheet.max_row, end_column=current_cell.column)
 
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")

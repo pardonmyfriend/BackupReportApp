@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import seaborn as sns
 import plotly.graph_objects as go
-from datetime import datetime
 
 def status(df):
     status_counts = df['Status'].value_counts(normalize=True) * 100

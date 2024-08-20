@@ -2,7 +2,7 @@ import streamlit as st
 
 st.header("Adjust parameters")
 
-if 'backup_summary' not in st.session_state:
+if 'backup' not in st.session_state:
     st.warning(":material/warning: Data file not uploaded yet. Please upload your data file to set parameters.")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
         st.switch_page('pages/upload_file.py')

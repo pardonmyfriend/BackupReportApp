@@ -111,8 +111,80 @@ def report_summary(sheet):
 
     backup_summary, details_summary = pd.DataFrame(backup_jobs_list), pd.DataFrame(details_list)
 
-    backup_summary.sort_values('Date', inplace=True)
-    backup_summary.reset_index(drop=True, inplace=True)
-    details_summary.sort_values('Date', inplace=True)
-    details_summary.reset_index(drop=True, inplace=True)
+    # backup_summary['Start Datetime'] = backup_summary.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
+    # details_summary['Start Datetime'] = details_summary.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
+
+    # backup_summary.sort_values('Date', inplace=True)
+    # backup_summary.reset_index(drop=True, inplace=True)
+    # details_summary.sort_values('Date', inplace=True)
+    # details_summary.reset_index(drop=True, inplace=True)
     return backup_summary, details_summary
+
+
+def get_last_backups(backups, backups_obj):
+    backups_obj = backups_obj.iloc[::-1].reset_index(drop=True)
+
+    backup_job_obj = {}
+    last_backup_obj = backups_obj.iloc[0:0]
+
+    for i in range(len(backups_obj)):
+        current_job = backups_obj.loc[i, 'Backup Job']
+        current_obj = backups_obj.loc[i, 'Object']
+
+        if current_job not in backup_job_obj:
+            backup_job_obj[current_job] = []
+
+        if current_obj not in backup_job_obj[current_job]:
+            backup_job_obj[current_job].append(current_obj)
+            last_backup_obj = pd.concat([last_backup_obj, backups_obj.iloc[[i]]], ignore_index=True)
+
+    last_backup_obj.sort_values(['Date', 'Backup Job'], inplace=True)
+    last_backup_obj.reset_index(drop=True, inplace=True)
+
+    last_backup = pd.DataFrame(columns=backups.columns)
+
+    for i in range(len(last_backup_obj)):
+        backup_job = last_backup_obj.loc[i, 'Backup Job']
+        backup_date = last_backup_obj.loc[i, 'Date']
+
+        matching_backups = backups[(backups['Backup Job'] == backup_job) & (backups['Date'] == backup_date)]
+        if not matching_backups.empty:
+            matching_backups = matching_backups.sort_values(by='Start Time', ascending=False)
+            latest_backup = matching_backups.iloc[0:1]
+            last_backup = pd.concat([last_backup, latest_backup], ignore_index=True)
+
+        last_backup.drop_duplicates(inplace=True)
+
+    return last_backup, last_backup_obj
+
+
+def get_job_objects(backups, backups_obj):
+    backup_jobs = []
+    backup_job_obj = {}
+
+    for i in range(len(backups)):
+        current_job = backups.loc[i, 'Backup Job']
+
+        if current_job not in backup_jobs:
+            backup_jobs.append(current_job)
+
+    for i in range(len(backups_obj)):
+        current_job = backups_obj.loc[i, 'Backup Job']
+        current_obj = backups_obj.loc[i, 'Object']
+
+        if current_job not in backup_job_obj:
+            backup_job_obj[current_job] = []
+
+        if current_obj not in backup_job_obj[current_job]:
+            backup_job_obj[current_job].append(current_obj)
+
+    return backup_job_obj
+
+
+def combine(dfs):
+    df_combined = pd.concat(dfs)
+    df_combined.drop_duplicates(inplace=True)
+    df_combined.sort_values(['Date', 'Start Time'], inplace=True)
+    df_combined.reset_index(drop=True, inplace=True)
+
+    return df_combined

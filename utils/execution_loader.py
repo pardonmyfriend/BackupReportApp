@@ -23,10 +23,27 @@ MONTHS_MAP = {
 }
 
 
+DAYS_MAP = {
+    "poniedziałek": "Monday",
+    "wtorek": "Tuesday",
+    "środa": "Wednesday",
+    "czwartek": "Thursday",
+    "piątek": "Friday",
+    "sobota": "Saturday",
+    "niedziela": "Sunday"
+}
+
+
 def replace_months(date_str):
     for key, value in MONTHS_MAP.items():
         date_str = date_str.replace(key, value)
     return date_str
+
+
+def replace_days(day):
+    for key, value in DAYS_MAP.items():
+        day = day.replace(key, value)
+    return day
 
 
 def merge_retry_rows(df):
@@ -70,6 +87,7 @@ def get_backup_execution(sheet):
             else:
                 current_job = row[0].split("Backup job: ")[1].strip()
             current_entry = {
+                'Month': None,
                 'Date': None,
                 'Week number': None,
                 'Day of week': None,
@@ -77,13 +95,14 @@ def get_backup_execution(sheet):
                 'Status': status
             }
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
-            day_of_week = row[0].split(',')[0]
+            day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
             current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S').date()
-            match = re.search(r'\b(\d{1,2})\b', date_str)
-            if match:
-                day = int(match.group(1))
-            week_num = (day - 1) // 7 + 1
+            # match = re.search(r'\b(\d{1,2})\b', date_str)
+            # if match:
+            #     day = int(match.group(1))
+            week_num = (current_entry['Date'].day - 1) // 7 + 1
+            month = current_entry['Date'].month
             current_entry['Week number'] = week_num
             current_entry['Day of week'] = day_of_week
         elif row[3] and row[2] == "Start time" and row[3] != "End time":
@@ -95,6 +114,7 @@ def get_backup_execution(sheet):
                 retry_num = None
             backup_jobs.append(current_entry)
             current_entry = {
+                'Month': None,
                 'Date': None,
                 'Week number': None,
                 'Day of week': None,
@@ -104,18 +124,25 @@ def get_backup_execution(sheet):
     df = pd.DataFrame(backup_jobs)
 
     for row in range(len(df)):
-        for col in df.columns[5:]:
+        for col in df.columns[6:]:
             if pd.notna(df.loc[row, col]):
                 date = pd.to_datetime(df.at[row, 'Date'])
                 time = pd.to_datetime(df.at[row, col], format='%H:%M:%S').time()
-                df.at[row, 'Start datetime'] = datetime.combine(date, time)
-    
-    df = df.sort_values(by='Start datetime').reset_index(drop=True)
-    df.drop(['Date', 'Start datetime'], axis=1, inplace=True)
+                df.at[row, 'Start Datetime'] = datetime.combine(date, time)
 
     retry_columns = sorted([col for col in df.columns if re.match(r'Backup \(Retry \d+\)', col)], key=lambda x: int(re.search(r'\d+', x).group()))
-    sorted_columns = ['Week number', 'Day of week', 'Backup job', 'Backup'] + retry_columns + ['Status']
+    sorted_columns = ['Week number', 'Day of week', 'Start Datetime', 'Backup job', 'Backup'] + retry_columns + ['Status']
 
     df = df[sorted_columns]
 
-    return merge_retry_rows(df)
+    return df
+
+
+def combine_exec(dfs):
+    df_combined = pd.concat(dfs)
+    df_combined.drop_duplicates(inplace=True)
+    df_combined.sort_values('Start Datetime', inplace=True)
+    df_combined.drop(['Start Datetime'], axis=1, inplace=True)
+    df_combined.reset_index(drop=True, inplace=True)
+
+    return df_combined
