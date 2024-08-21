@@ -4,6 +4,15 @@ import plotly.express as px
 import seaborn as sns
 import plotly.graph_objects as go
 
+
+def highlight_error(row):
+    if row['Status'] == 'Error':
+        return ['background-color: rgba(255, 99, 71, 0.3)'] * len(row)
+    if row['Status'] == 'Warning':
+        return ['background-color: rgba(255, 165, 0, 0.3)'] * len(row)
+    else:
+        return [''] * len(row)
+
 def status(df):
     status_counts = df['Status'].value_counts(normalize=True) * 100
 

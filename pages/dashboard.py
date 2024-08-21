@@ -1,6 +1,5 @@
 import streamlit as st
 from utils.charts import *
-import pandas as pd
 from utils.data_processing import process_data
 
 
@@ -31,7 +30,7 @@ else:
 
         with tab1:
             st.markdown("#### Backup data")
-            st.dataframe(backup_df)
+            st.dataframe(backup_df, use_container_width=True)
             with open("workbooks/Backup.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download backup data",
@@ -43,7 +42,7 @@ else:
 
         with tab2:
             st.markdown("#### Detailed backup data by object")
-            st.dataframe(obj_df)
+            st.dataframe(obj_df, use_container_width=True)
             with open("workbooks/Backup - objects.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download detailed data by object",
@@ -55,7 +54,8 @@ else:
 
         with tab3:
             st.markdown("#### Last backup data")
-            st.dataframe(last_backup_df)
+            styled_df = last_backup_df.style.apply(highlight_error, axis=1)
+            st.dataframe(styled_df, use_container_width=True)
             with open("workbooks/Last backup.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download last backup data",
@@ -67,7 +67,8 @@ else:
 
         with tab4:
             st.markdown("#### Detailed last backup data by object")
-            st.dataframe(last_obj_df)
+            styled_df = last_obj_df.style.apply(highlight_error, axis=1)
+            st.dataframe(styled_df, use_container_width=True)
             with open("workbooks/Last backup - objects.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download detailed last backup data",
@@ -79,7 +80,8 @@ else:
 
         with tab5:
             st.markdown("#### Weekly backup job execution and results")
-            st.dataframe(execution_df)
+            styled_df = execution_df.fillna("").style.apply(highlight_error, axis=1)
+            st.dataframe(styled_df, use_container_width=True)
             with open("workbooks/Backup execution.xlsx", "rb") as file:
                 st.download_button(
                     label=":material/download: Download weekly execution data",
@@ -136,7 +138,7 @@ else:
             )
 
     with tab_three:
-        backup = process_data(backup_df)
+        backup, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
 
         tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Backup job status", "Error rate", "Others", "Performance", "Trends", "Duration", "Gantt chart"])
 

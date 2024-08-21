@@ -4,18 +4,18 @@ import re
 
 
 MONTHS_MAP = {
-    'stycznia': 'styczeń',
-    'lutego': 'luty',
-    'marca': 'marzec',
-    'kwietnia': 'kwiecień',
-    'maja': 'maj',
-    'czerwca': 'czerwiec',
-    'lipca': 'lipiec',
-    'sierpnia': 'sierpień',
-    'września': 'wrzesień',
-    'października': 'październik',
-    'listopada': 'listopad',
-    'grudnia': 'grudzień'
+    'stycznia': 'January',
+    'lutego': 'February',
+    'marca': 'March',
+    'kwietnia': 'April',
+    'maja': 'May',
+    'czerwca': 'June',
+    'lipca': 'July',
+    'sierpnia': 'August',
+    'września': 'September',
+    'października': 'October',
+    'listopada': 'November',
+    'grudnia': 'December'
 }
 
 
@@ -109,16 +109,12 @@ def report_summary(sheet):
             })
             details_list.append(details_entry)
 
-    backup_summary, details_summary = pd.DataFrame(backup_jobs_list), pd.DataFrame(details_list)
+    backup_df, obj_df = pd.DataFrame(backup_jobs_list), pd.DataFrame(details_list)
 
-    # backup_summary['Start Datetime'] = backup_summary.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
-    # details_summary['Start Datetime'] = details_summary.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
+    # backup_df['Duration'] = backup_df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
+    # obj_df['Duration'] = obj_df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
 
-    # backup_summary.sort_values('Date', inplace=True)
-    # backup_summary.reset_index(drop=True, inplace=True)
-    # details_summary.sort_values('Date', inplace=True)
-    # details_summary.reset_index(drop=True, inplace=True)
-    return backup_summary, details_summary
+    return backup_df, obj_df
 
 
 def get_last_backups(backups, backups_obj):

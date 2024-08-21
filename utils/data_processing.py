@@ -1,36 +1,37 @@
 import pandas as pd
 from datetime import datetime
-
+    
 
 def convert_to_gb(size):
     if size == "0 B":
         return 0.0
     number, unit = size.split()
     number = float(number.replace(',', '.'))
-    if unit == 'TB':
-        return number * 1024
-    elif unit == 'MB':
-        return number / 1024
-    elif unit == 'KB':
-        return number / (1024 * 1024)
-    elif unit == 'B':
-        return number / (1024 * 1024 * 1024)
-    elif unit == 'GB':
-        return number
-    else:
-        return None
+    unit_conversion = {
+        'TB': 1024,
+        'GB': 1,
+        'MB': 1 / 1024,
+        'KB': 1 / (1024 * 1024),
+        'B': 1 / (1024 * 1024 * 1024)
+    }
+    return number * unit_conversion.get(unit, 0)
+
+
+def apply_to_df(df, columns):
+    for column in columns:
+        df[f'{column} (GB)'] = df[column].apply(convert_to_gb)
+        df.drop([column], axis=1, inplace=True)
     
 
 def remove_x_and_convert(value):
     return float(value.replace('x', '').replace(',', '.'))
 
 
-def convert_to_datetime(df):
+def convert(df):
     df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
     df['Start Time'] = pd.to_datetime(df['Start Time'], format='%H:%M:%S')
     df['End Time'] = pd.to_datetime(df['End Time'], format='%H:%M:%S').dt.time
-    df['Duration'] = df['Duration'].apply(lambda x: x.strftime('%H:%M:%S'))
-    df['Duration'] = pd.to_timedelta(df['Duration'])
+    df['Duration'] = df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
 
 
 def useful_cols(df):
@@ -38,19 +39,41 @@ def useful_cols(df):
     df['Start Datetime'] = df.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
     df['End Datetime'] = df.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['End Time'], format='%H:%M:%S').time()), axis=1)
 
-
-def process_data(df_origin):
-    df = df_origin.copy()
-    df['Total Size (GB)'] = df['Total Size'].apply(convert_to_gb)
-    df['Backup Size (GB)'] = df['Backup Size'].apply(convert_to_gb)
-    df['Data Read (GB)'] = df['Data Read'].apply(convert_to_gb)
-    df['Transferred (GB)'] = df['Transferred'].apply(convert_to_gb)
-
-    df['Dedupe'] = df['Dedupe'].apply(remove_x_and_convert)
-    df['Compression'] = df['Compression'].apply(remove_x_and_convert)
-
-    convert_to_datetime(df)
-
-    useful_cols(df)
-
     return df
+
+
+def process_data(backup_df, obj_df, last_backup_df, last_obj_df):
+    backup_copy, obj_copy, last_backup_copy, last_obj_copy = backup_df.copy(), obj_df.copy(), last_backup_df.copy(), last_obj_df.copy()
+
+    convert(backup_copy)
+    convert(obj_copy)
+    convert(last_backup_copy)
+    convert(last_obj_copy)
+
+    apply_to_df(backup_copy, ['Total Size', 'Backup Size', 'Data Read', 'Transferred'])
+    apply_to_df(last_backup_copy, ['Total Size', 'Backup Size', 'Data Read', 'Transferred'])
+    apply_to_df(obj_copy, ['Size', 'Read', 'Transferred'])
+    apply_to_df(last_obj_copy, ['Size', 'Read', 'Transferred'])
+
+    backup_copy['Dedupe'] = backup_copy['Dedupe'].apply(remove_x_and_convert)
+    backup_copy['Compression'] = backup_copy['Compression'].apply(remove_x_and_convert)
+    last_backup_copy['Dedupe'] = last_backup_copy['Dedupe'].apply(remove_x_and_convert)
+    last_backup_copy['Compression'] = last_backup_copy['Compression'].apply(remove_x_and_convert)
+
+    useful_cols(backup_copy)
+
+    return backup_copy, obj_copy, last_backup_copy, last_obj_copy
+
+    # df = df_origin.copy()
+    # df['Total Size (GB)'] = df['Total Size'].apply(convert_to_gb)
+    # df['Backup Size (GB)'] = df['Backup Size'].apply(convert_to_gb)
+    # df['Data Read (GB)'] = df['Data Read'].apply(convert_to_gb)
+    # df['Transferred (GB)'] = df['Transferred'].apply(convert_to_gb)
+
+    # df['Dedupe'] = df['Dedupe'].apply(remove_x_and_convert)
+    # df['Compression'] = df['Compression'].apply(remove_x_and_convert)
+
+    # convert_to_datetime(df)
+
+    # 
+    # return df

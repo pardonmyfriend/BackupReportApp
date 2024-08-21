@@ -2,24 +2,22 @@ import re
 import pandas as pd
 from datetime import datetime
 import locale
-
-
-locale.setlocale(locale.LC_TIME, 'pl_PL.UTF-8')
+import streamlit as st
 
 
 MONTHS_MAP = {
-    'stycznia': 'styczeń',
-    'lutego': 'luty',
-    'marca': 'marzec',
-    'kwietnia': 'kwiecień',
-    'maja': 'maj',
-    'czerwca': 'czerwiec',
-    'lipca': 'lipiec',
-    'sierpnia': 'sierpień',
-    'września': 'wrzesień',
-    'października': 'październik',
-    'listopada': 'listopad',
-    'grudnia': 'grudzień'
+    'stycznia': 'January',
+    'lutego': 'February',
+    'marca': 'March',
+    'kwietnia': 'April',
+    'maja': 'May',
+    'czerwca': 'June',
+    'lipca': 'July',
+    'sierpnia': 'August',
+    'września': 'September',
+    'października': 'October',
+    'listopada': 'November',
+    'grudnia': 'December'
 }
 
 
@@ -47,7 +45,7 @@ def replace_days(day):
 
 
 def merge_retry_rows(df):
-    backup_columns = df.columns[3:]
+    backup_columns = df.columns[4:]
     rows_to_remove = []
 
     for i, row in df.iterrows():
@@ -98,11 +96,9 @@ def get_backup_execution(sheet):
             day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
             current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S').date()
-            # match = re.search(r'\b(\d{1,2})\b', date_str)
-            # if match:
-            #     day = int(match.group(1))
             week_num = (current_entry['Date'].day - 1) // 7 + 1
             month = current_entry['Date'].month
+            current_entry['Month'] = month
             current_entry['Week number'] = week_num
             current_entry['Day of week'] = day_of_week
         elif row[3] and row[2] == "Start time" and row[3] != "End time":
@@ -131,7 +127,7 @@ def get_backup_execution(sheet):
                 df.at[row, 'Start Datetime'] = datetime.combine(date, time)
 
     retry_columns = sorted([col for col in df.columns if re.match(r'Backup \(Retry \d+\)', col)], key=lambda x: int(re.search(r'\d+', x).group()))
-    sorted_columns = ['Week number', 'Day of week', 'Start Datetime', 'Backup job', 'Backup'] + retry_columns + ['Status']
+    sorted_columns = ['Month', 'Week number', 'Day of week', 'Start Datetime', 'Backup job', 'Backup'] + retry_columns + ['Status']
 
     df = df[sorted_columns]
 

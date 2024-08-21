@@ -1,7 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 from openpyxl.formatting.rule import FormulaRule
-import locale
 
 def merge_cells(ws):
     cell_value = ws['B1']
@@ -55,8 +54,6 @@ def format_borders(ws):
 
 
 def format_backup():
-    locale.setlocale(locale.LC_TIME, 'pl_PL.UTF-8')
-
     workbook = load_workbook('workbooks/Backup data overview.xlsx')
     ws_backups = workbook['Backup']
     ws_details = workbook['Backup - objects']
@@ -144,7 +141,7 @@ def format_backup():
     workbook.save('workbooks/Backup data overview.xlsx')
 
 
-def format_backup_execution():
+def format_execution():
     workbook = load_workbook('workbooks/Backup data overview.xlsx')
     worksheet = workbook['Backup execution']
 
@@ -152,26 +149,26 @@ def format_backup_execution():
     red_fill = PatternFill(start_color='FFCCCC', end_color='FFCCCC', fill_type='solid')
     orange_fill = PatternFill(start_color='FFE5CC', end_color='FFE5CC', fill_type='solid')
 
-    success_rule = FormulaRule(formula=['$H2="Success"'], fill=green_fill)
-    error_rule = FormulaRule(formula=['$H2="Error"'], fill=red_fill)
-    warning_rule = FormulaRule(formula=['$H2="Warning"'], fill=orange_fill)
+    success_rule = FormulaRule(formula=['$I2="Success"'], fill=green_fill)
+    error_rule = FormulaRule(formula=['$I2="Error"'], fill=red_fill)
+    warning_rule = FormulaRule(formula=['$I2="Warning"'], fill=orange_fill)
 
-    worksheet.conditional_formatting.add('C2:H' + str(worksheet.max_row), success_rule)
-    worksheet.conditional_formatting.add('C2:H' + str(worksheet.max_row), error_rule)
-    worksheet.conditional_formatting.add('C2:H' + str(worksheet.max_row), warning_rule)
+    worksheet.conditional_formatting.add('D2:I' + str(worksheet.max_row), success_rule)
+    worksheet.conditional_formatting.add('D2:I' + str(worksheet.max_row), error_rule)
+    worksheet.conditional_formatting.add('D2:I' + str(worksheet.max_row), warning_rule)
 
     cell_value = {'week': None, 'day': None}
     merge_start_day = 2
     
     for row in range(2, worksheet.max_row + 1):
-        week_number_cell = worksheet[f'A{row}']
-        day_of_week_cell = worksheet[f'B{row}']
+        week_number_cell = worksheet[f'B{row}']
+        day_of_week_cell = worksheet[f'C{row}']
         
         if week_number_cell.value == cell_value['week'] and day_of_week_cell.value == cell_value['day']:
             day_of_week_cell.value = None
         else:
             if row > merge_start_day:
-                worksheet.merge_cells(start_row=merge_start_day, start_column=2, end_row=row - 1, end_column=2)
+                worksheet.merge_cells(start_row=merge_start_day, start_column=3, end_row=row - 1, end_column=3)
             
             cell_value = {
                 'week': week_number_cell.value,
@@ -180,8 +177,22 @@ def format_backup_execution():
             merge_start_day = row
 
     if merge_start_day < worksheet.max_row:
-        worksheet.merge_cells(start_row=merge_start_day, start_column=2, end_row=worksheet.max_row, end_column=2)
+        worksheet.merge_cells(start_row=merge_start_day, start_column=3, end_row=worksheet.max_row, end_column=3)
 
+    cell_value = None
+    merge_start = 2
+    for row in range(2, worksheet.max_row + 1):
+        current_cell = worksheet[f'B{row}']
+        if current_cell.value == cell_value:
+            current_cell.value = None
+        else:
+            if row > merge_start:
+                worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=row - 1, end_column=current_cell.column)
+            cell_value = current_cell.value
+            merge_start = row
+    if merge_start < worksheet.max_row:
+        worksheet.merge_cells(start_row=merge_start, start_column=current_cell.column, end_row=worksheet.max_row, end_column=current_cell.column)
+    
     cell_value = None
     merge_start = 2
     for row in range(2, worksheet.max_row + 1):
@@ -219,6 +230,10 @@ def format_backup_execution():
             cell.alignment = al
 
     for row in worksheet.iter_rows(min_col=2, max_col=2, min_row=1, max_row=worksheet.max_row):
+        for cell in row:
+            cell.alignment = al
+
+    for row in worksheet.iter_rows(min_col=3, max_col=3, min_row=1, max_row=worksheet.max_row):
         for cell in row:
             cell.alignment = al
 
