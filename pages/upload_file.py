@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from openpyxl import load_workbook
 import locale
 from utils.backup_loader import report_summary, get_last_backups, get_job_objects, combine
@@ -32,6 +33,7 @@ def load_data(files):
     st.session_state['job_obj'] = job_obj
     st.session_state['min_date'] = backup_df.loc[0, 'Date']
     st.session_state['max_date'] = backup_df.iloc[-1]['Date']
+    st.session_state['year'] = pd.to_datetime(backup_df.loc[0, 'Date']).year
     st.session_state['execution'] = execution_df
     st.session_state['data_loaded'] = True
 
@@ -57,7 +59,7 @@ if 'data_loaded' in st.session_state and st.session_state['data_loaded']:
     tab1.dataframe(backup_df)
     tab2.dataframe(obj_df)
 
-    if st.button('Reset Data', use_container_width=True, type='secondary'):
+    if st.button('Reset data', use_container_width=True):
         st.session_state['reset'] = True
         st.switch_page("pages/upload_file.py")
 

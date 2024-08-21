@@ -1,7 +1,6 @@
 import re
 import pandas as pd
 from datetime import datetime
-import locale
 import streamlit as st
 
 
