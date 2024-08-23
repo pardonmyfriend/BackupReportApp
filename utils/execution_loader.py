@@ -95,7 +95,11 @@ def get_backup_execution(sheet):
             day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
             current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S').date()
-            week_num = (current_entry['Date'].day - 1) // 7 + 1
+
+            month_first_day = current_entry['Date'].replace(day=1)
+            days_from_first_monday = (current_entry['Date'] - month_first_day).days + month_first_day.weekday()
+            week_num = days_from_first_monday // 7 + 1
+
             month = current_entry['Date'].month
             current_entry['Month'] = month
             current_entry['Week number'] = week_num

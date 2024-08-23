@@ -4,28 +4,18 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
-def format_weeks(week, week_start, week_end):
-    week_start, week_end = get_week_dates(month, week)
-    return 
-
-
-def get_month_week():
-    execution = st.session_state['execution']
+def get_month_week(execution):
     month_week = {}
 
     for month, weeks in execution.groupby('Month')['Week number']:
          week_dates = []
          for week in weeks:
              week_dates.append(week)
-         month = calendar.month_name[month]
          month_week[month] = sorted(list(set(week_dates)))
 
     return month_week
 
-def get_week_dates(month, week):
-    year = st.session_state['year']
-
-    month = datetime.strptime(month, "%B").month
+def get_week_dates(year, month, week):
     month_start = pd.Timestamp(f'{year}-{month:02d}-01')
 
     day_of_week = month_start.weekday()
@@ -46,9 +36,9 @@ def get_week_dates(month, week):
     
     return week_start.date(), week_end.date()
 
-def get_days_for_month(year, month):
-    min_day = pd.Timestamp(st.session_state['min_date'])
-    max_day = pd.Timestamp(st.session_state['max_date'])
+def get_days_for_month(year, month, min_date, max_date):
+    min_day = pd.Timestamp(min_date)
+    max_day = pd.Timestamp(max_date)
 
     month_start = pd.Timestamp(f'{year}-{month:02d}-01')
     month_end =  month_start + pd.offsets.MonthEnd(0)
