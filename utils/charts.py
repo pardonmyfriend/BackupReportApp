@@ -36,7 +36,6 @@ def status_by_backup(df):
     fig.update_yaxes(title_text='Count')
 
     fig.update_layout(
-        # margin=dict(l=40, r=40, t=40, b=100),
         height=600,
         legend_title_text='Status'
     )
@@ -61,8 +60,6 @@ def error(df):
     fig.update_layout(
         xaxis={'tickangle': -45, 'automargin': True, 'tickmode': 'array', 'tickvals': backup_stats['Backup Job']},
         height=600,
-        # width=800,
-        # margin=dict(l=40, r=40, t=40, b=100),
         showlegend=False
     )
 

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 def get_month_week(execution):
     month_week = {}
 
-    for month, weeks in execution.groupby('Month')['Week number']:
+    for month, weeks in execution.groupby('Month')['Week Number']:
          week_dates = []
          for week in weeks:
              week_dates.append(week)

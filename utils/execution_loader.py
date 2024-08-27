@@ -48,7 +48,7 @@ def merge_retry_rows(df):
     rows_to_remove = []
 
     for i, row in df.iterrows():
-        backup_job = row['Backup job']
+        backup_job = row['Backup Job']
 
         for col1 in backup_columns:
             if pd.notna(row[col1]):
@@ -57,7 +57,7 @@ def merge_retry_rows(df):
                 for col2 in backup_columns:
                     if pd.notna(row[col2]):
                         for j in range(i - 1, -1, -1):
-                            if df.loc[j, 'Backup job'] == backup_job and pd.isna(df.loc[j, col2]):
+                            if df.loc[j, 'Backup Job'] == backup_job and pd.isna(df.loc[j, col2]):
                                 df.loc[j, col2] = row[col2]
                                 df.loc[j, 'Status'] = row['Status']
                                 rows_to_remove.append(i)
@@ -86,9 +86,9 @@ def get_backup_execution(sheet):
             current_entry = {
                 'Month': None,
                 'Date': None,
-                'Week number': None,
-                'Day of week': None,
-                'Backup job': current_job,
+                'Week Number': None,
+                'Day of Week': None,
+                'Backup Job': current_job,
                 'Status': status
             }
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
@@ -102,8 +102,8 @@ def get_backup_execution(sheet):
 
             month = current_entry['Date'].month
             current_entry['Month'] = month
-            current_entry['Week number'] = week_num
-            current_entry['Day of week'] = day_of_week
+            current_entry['Week Number'] = week_num
+            current_entry['Day of Week'] = day_of_week
         elif row[3] and row[2] == "Start time" and row[3] != "End time":
             start_time = row[3]
             if retry_num is None:
@@ -115,9 +115,9 @@ def get_backup_execution(sheet):
             current_entry = {
                 'Month': None,
                 'Date': None,
-                'Week number': None,
-                'Day of week': None,
-                'Backup job': current_job,
+                'Week Number': None,
+                'Day of Week': None,
+                'Backup Job': current_job,
                 'Status': None
             }
     df = pd.DataFrame(backup_jobs)
@@ -130,7 +130,7 @@ def get_backup_execution(sheet):
                 df.at[row, 'Start Datetime'] = datetime.combine(date, time)
 
     retry_columns = sorted([col for col in df.columns if re.match(r'Backup \(Retry \d+\)', col)], key=lambda x: int(re.search(r'\d+', x).group()))
-    sorted_columns = ['Month', 'Week number', 'Day of week', 'Start Datetime', 'Backup job', 'Backup'] + retry_columns + ['Status']
+    sorted_columns = ['Month', 'Week Number', 'Day of Week', 'Start Datetime', 'Backup Job', 'Backup'] + retry_columns + ['Status']
 
     df = df[sorted_columns]
 

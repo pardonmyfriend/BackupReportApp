@@ -111,9 +111,6 @@ def report_summary(sheet):
 
     backup_df, obj_df = pd.DataFrame(backup_jobs_list), pd.DataFrame(details_list)
 
-    # backup_df['Duration'] = backup_df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
-    # obj_df['Duration'] = obj_df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
-
     return backup_df, obj_df
 
 

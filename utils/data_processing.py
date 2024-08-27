@@ -63,17 +63,3 @@ def process_data(backup_df, obj_df, last_backup_df, last_obj_df):
     useful_cols(backup_copy)
 
     return backup_copy, obj_copy, last_backup_copy, last_obj_copy
-
-    # df = df_origin.copy()
-    # df['Total Size (GB)'] = df['Total Size'].apply(convert_to_gb)
-    # df['Backup Size (GB)'] = df['Backup Size'].apply(convert_to_gb)
-    # df['Data Read (GB)'] = df['Data Read'].apply(convert_to_gb)
-    # df['Transferred (GB)'] = df['Transferred'].apply(convert_to_gb)
-
-    # df['Dedupe'] = df['Dedupe'].apply(remove_x_and_convert)
-    # df['Compression'] = df['Compression'].apply(remove_x_and_convert)
-
-    # convert_to_datetime(df)
-
-    # 
-    # return df
