@@ -39,7 +39,11 @@ def useful_cols(df):
     df['Start Datetime'] = df.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
     df['End Datetime'] = df.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['End Time'], format='%H:%M:%S').time()), axis=1)
 
-    return df
+def useful_cols_obj(df):
+    df['Success'] = df['Status'].apply(lambda x: 1 if x == 'Success' else 0)
+    df['Warning'] = df['Status'].apply(lambda x: 1 if x == 'Warning' else 0)
+    df['Error'] = df['Status'].apply(lambda x: 1 if x == 'Error' else 0)
+    df['Start Datetime'] = df.apply(lambda row: datetime.combine(pd.to_datetime(row['Date']), pd.to_datetime(row['Start Time'], format='%H:%M:%S').time()), axis=1)
 
 
 def process_data(backup_df, obj_df, last_backup_df, last_obj_df):
@@ -61,5 +65,6 @@ def process_data(backup_df, obj_df, last_backup_df, last_obj_df):
     last_backup_copy['Compression'] = last_backup_copy['Compression'].apply(remove_x_and_convert)
 
     useful_cols(backup_copy)
+    useful_cols_obj(obj_copy)
 
     return backup_copy, obj_copy, last_backup_copy, last_obj_copy

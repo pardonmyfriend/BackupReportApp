@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import seaborn as sns
 import plotly.graph_objects as go
+from scipy.stats import gaussian_kde
 
 
 def highlight_error(row):
@@ -32,7 +34,7 @@ def status_by_backup(df):
                 color_discrete_map={'Success': '#66c2a5', 'Warning': '#fc8d62', 'Error': '#d53e4f'},
                 title='Backup Results for Jobs: Count of Successes, Warnings and Errors')
 
-    fig.update_xaxes(title_text='Backup Job', tickangle=-45)
+    fig.update_xaxes(title_text='Backup Job', tickangle=-90)
     fig.update_yaxes(title_text='Count')
 
     fig.update_layout(
@@ -58,12 +60,12 @@ def error(df):
                 color_discrete_sequence=colors)
 
     fig.update_layout(
-        xaxis={'tickangle': -45, 'automargin': True, 'tickmode': 'array', 'tickvals': backup_stats['Backup Job']},
+        xaxis={'tickangle': -90, 'automargin': True, 'tickmode': 'array', 'tickvals': backup_stats['Backup Job']},
         height=600,
         showlegend=False
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def error_daily(df):
@@ -80,7 +82,7 @@ def error_daily(df):
         yaxis_title='Error Rate'
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def error_hour(df):
@@ -97,7 +99,44 @@ def error_hour(df):
         yaxis_title='Error Rate'
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def plot_avg(vm_performance, x_col, title, x_label):
+    fig = px.bar(vm_performance, 
+                 x=x_col, 
+                 y='Backup Job', 
+                 color='Backup Job',
+                 orientation='h',
+                 color_discrete_sequence=sns.color_palette("viridis", len(vm_performance)).as_hex(),
+                 title=title)
+    
+    fig.update_layout(
+        xaxis_title=x_label,
+        yaxis_title='Backup Job',
+        showlegend=False,
+        height=600
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def averages(df):
+    vm_performance = df.groupby('Backup Job').agg({
+        'Total Size (GB)': 'mean',
+        'Backup Size (GB)': 'mean',
+        'Data Read (GB)': 'mean',
+        'Transferred (GB)': 'mean',
+        'Duration': 'mean'
+    }).reset_index()
+
+    vm_performance['Duration'] = vm_performance['Duration'].dt.total_seconds() / 60
+
+    plot_avg(vm_performance, 'Total Size (GB)', 'Average Total Size for Each Backup Job', 'Average Size (GB)')
+    plot_avg(vm_performance, 'Backup Size (GB)', 'Average Backup Size for Each Backup Job', 'Average Size (GB)')
+    plot_avg(vm_performance, 'Data Read (GB)', 'Average Data Read for Each Backup Job', 'Average Data Read (GB)')
+    plot_avg(vm_performance, 'Transferred (GB)', 'Average Data Transferred for Each Backup Job', 'Average Data Transferred (GB)')
+    plot_avg(vm_performance, 'Duration', 'Average Backup Duration for Each Backup Job', 'Average Duration (minutes)')
 
 
 def perfomance(df):
@@ -110,7 +149,6 @@ def perfomance(df):
 
         col1, col2 = st.columns(2)
 
-        # Wykres dla Backup Size, Data Read, Transferred
         with col1:
             fig1 = px.line(job_df, x='Start Datetime', 
                         y=['Backup Size (GB)', 'Data Read (GB)', 'Transferred (GB)'],
@@ -124,9 +162,8 @@ def perfomance(df):
                 legend=dict(orientation="h", yanchor="top", y=-0.4, xanchor="left", x=0)
             )
 
-            st.plotly_chart(fig1)
+            st.plotly_chart(fig1, use_container_width=True)
 
-        # Wykres dla Dedupe, Compression
         with col2:
             fig2 = px.line(job_df, x='Start Datetime', 
                         y=['Dedupe', 'Compression'],
@@ -140,7 +177,7 @@ def perfomance(df):
                 legend=dict(orientation="h", yanchor="top", y=-0.4, xanchor="left", x=0)
             )
 
-            st.plotly_chart(fig2)
+            st.plotly_chart(fig2, use_container_width=True)
 
 
 def size(df):
@@ -150,7 +187,7 @@ def size(df):
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='Total Size (GB)')
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def efficiency(df):
@@ -162,8 +199,8 @@ def efficiency(df):
                     title='Efficiency of Compression vs Backup Size',
                     labels={'Backup Size (GB)': 'Backup Size (GB)', 'Compression': 'Compression Ratio'})
 
-    st.plotly_chart(fig1)
-    st.plotly_chart(fig2)
+    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True)
 
 
 def daily_trends(df):
@@ -187,7 +224,7 @@ def daily_trends(df):
             yaxis_title='Size (GB)'
         )
 
-        st.plotly_chart(fig1)
+        st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
         daily_trends['Duration (minutes)'] = daily_trends['Duration'].dt.total_seconds() / 60
@@ -202,7 +239,7 @@ def daily_trends(df):
             yaxis_title='Duration (minutes)'
         )
 
-        st.plotly_chart(fig2)
+        st.plotly_chart(fig2, use_container_width=True)
 
 
 def hour_trends(df):
@@ -226,7 +263,7 @@ def hour_trends(df):
             yaxis_title='Size (GB)'
         )
 
-        st.plotly_chart(fig1)
+        st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
         hourly_trends['Duration (minutes)'] = hourly_trends['Duration'].dt.total_seconds() / 60
@@ -241,7 +278,7 @@ def hour_trends(df):
             yaxis_title='Duration (minutes)'
         )
 
-        st.plotly_chart(fig2)
+        st.plotly_chart(fig2, use_container_width=True)
 
 
 def heatmap(df):
@@ -249,39 +286,73 @@ def heatmap(df):
 
     pivot_table = df_aggregated.pivot(index='Date', columns='Backup Job', values='Backup Size (GB)')
 
+    height = 60 * len(pivot_table.index)
+
     fig = go.Figure(data=go.Heatmap(
         z=pivot_table.values,
         x=pivot_table.columns,
         y=pivot_table.index,
-        zmin=0,
-        zmax=pivot_table.values.max(),
-        colorbar=dict(title="Backup Size (GB)")
+        colorscale='RdBu_r',
+        hoverongaps=False,
+        showscale=True,
+        text=pivot_table.values,
+        texttemplate="%{text:.0f}",
+        textfont={"size": 11, "color": "white"},
+        hovertemplate="%{x}<br>%{y}"
     ))
 
     fig.update_layout(
         title='Heatmap of Backup Sizes Over Time',
         xaxis_title='Backup Job',
         yaxis_title='Date',
-        xaxis=dict(tickangle=-45)
+        xaxis=dict(tickangle=-90, showgrid=False),
+        yaxis=dict(autorange="reversed", showgrid=False),
+        xaxis_nticks=len(pivot_table.columns),
+        yaxis_nticks=len(pivot_table.index),
+        height=height
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def duration_hist(df):
     df['Duration (minutes)'] = df['Duration'].dt.total_seconds() / 60
 
-    fig1 = px.histogram(df, x='Duration (minutes)', nbins=30, 
-                        title='Distribution of Backup Durations for Backup Jobs',
-                        labels={'Duration (minutes)': 'Duration (minutes)'},
-                        color_discrete_sequence=[sns.color_palette("viridis")[0]])
+    viridis_color = px.colors.sequential.Viridis[0]
+    r, g, b = px.colors.hex_to_rgb(viridis_color)
+    rgba_color_transparent = f'rgba({r},{g},{b},0.5)'
+    rgba_color_solid = f'rgba({r},{g},{b},1)'
 
-    fig1.update_traces(histnorm='density')
-    fig1.add_trace(px.line(df['Duration (minutes)'], y=df['Duration (minutes)']).data[0])
+    fig = px.histogram(df, 
+                       x='Duration (minutes)', 
+                       nbins=30,
+                       color_discrete_sequence=[rgba_color_transparent],
+                       title='Distribution of Backup Durations for Backup Jobs')
+    
+    for bar in fig.data:
+        bar.marker.line.width = 1.5
+        bar.marker.line.color = rgba_color_solid
+    
+    kde = gaussian_kde(df['Duration (minutes)'])
+    x_values = np.linspace(df['Duration (minutes)'].min(), df['Duration (minutes)'].max(), 500)
+    kde_values = kde(x_values)
 
-    fig1.update_layout(yaxis_title='Frequency')
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=kde_values * len(df) * (df['Duration (minutes)'].max() - df['Duration (minutes)'].min()) / 30,
+        mode='lines',
+        line=dict(color=rgba_color_solid),
+        name='Density'
+    ))
 
-    st.plotly_chart(fig1)
+    fig.update_layout(
+        xaxis_title='Duration (minutes)',
+        yaxis_title='Frequency',
+        showlegend=False,
+        height=450
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def duration_bar(df):
@@ -289,19 +360,21 @@ def duration_bar(df):
     avg_duration = avg_duration.sort_values(by='Duration', ascending=False)
     avg_duration['Duration'] = avg_duration['Duration'].dt.total_seconds() / 60
 
-    fig2 = px.bar(avg_duration, x='Backup Job', y='Duration',
+    fig = px.bar(avg_duration, x='Backup Job', y='Duration',
                 title='Average Backup Duration for Each Backup Job',
                 labels={'Duration': 'Average Duration (minutes)'},
                 color='Backup Job',
                 color_discrete_sequence=px.colors.sequential.Viridis)
 
-    fig2.update_layout(
+    fig.update_layout(
         xaxis_title='Backup Job',
         yaxis_title='Average Duration (minutes)',
-        xaxis_tickangle=-90
+        xaxis_tickangle=-90,
+        showlegend=False,
+        height=600
     )
 
-    st.plotly_chart(fig2)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def duration_box(df):
@@ -313,19 +386,21 @@ def duration_box(df):
 
     job_order = avg_duration['Backup Job'].tolist()
 
-    fig3 = px.box(df, x='Backup Job', y='Duration (minutes)',
+    fig = px.box(df, x='Backup Job', y='Duration (minutes)',
                 title='Distribution of Backup Durations for Each Backup Job',
                 color='Backup Job',
                 color_discrete_sequence=px.colors.sequential.Viridis,
                 category_orders={'Backup Job': job_order})
 
-    fig3.update_layout(
+    fig.update_layout(
         xaxis_title='Backup Job',
         yaxis_title='Duration (minutes)',
-        xaxis_tickangle=-90
+        xaxis_tickangle=-90,
+        showlegend=False,
+        height=700
     )
 
-    st.plotly_chart(fig3)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def gantt(df):
@@ -334,7 +409,6 @@ def gantt(df):
     fig = px.timeline(df, x_start="Start Datetime", x_end="End Datetime", y="Backup Job")
     fig.update_yaxes(autorange="reversed")
     fig.update_layout(
-        width=2000,
         height=600,
         xaxis=dict(
             rangeslider=dict(visible=True),
@@ -343,4 +417,4 @@ def gantt(df):
         )
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)

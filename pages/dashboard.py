@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.charts import *
+from utils.charts_obj import *
 from utils.data_processing import process_data
 from utils.df_to_excel import create_excels
 from utils.backup_loader import get_last_backups
@@ -26,8 +27,10 @@ else:
 
             st.session_state['last_backup'] = last_backup_df
             st.session_state['last_obj'] = last_obj_df
-
-            create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df)
+        
+            if not 'excels_generated' in st.session_state or not st.session_state['excels_generated']:
+                create_excels(st.session_state['backup'], st.session_state['obj'], last_backup_df, last_obj_df, st.session_state['execution'])
+                st.session_state['excels_generated'] = True
 
             summary_df = st.session_state['summary']
             summary_recent_df = st.session_state['summary_recent']
@@ -36,10 +39,10 @@ else:
             details_df = st.session_state['details']
             merged_counts_df = st.session_state['merged_counts']
 
-        tab_one, tab_two, tab_three = st.tabs(["BACKUP DATA OVERVIEW", "BACKUP SUMMARY", "BACKUP JOB ANALYTICS"])
+        tab_one, tab_two, tab_three, tab_four = st.tabs(["BACKUP DATA OVERVIEW", "BACKUP SUMMARY", "BACKUP ANALYTICS BY JOB", "BACKUP ANALYTICS BY OBJECT"])
 
         with tab_one:
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Backup Data", "Detailed Data by Object", "Last Backup Data", "Detailed Last Backup Data", "Weekly Execution Results"])
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Backup Data", "Backup Data by Object", "Last Backup Data", "Last Backup Data by Object", "Weekly Execution Results"])
 
             with tab1:
                 st.markdown("#### Backup data")
@@ -54,7 +57,7 @@ else:
                     )
 
             with tab2:
-                st.markdown("#### Detailed backup data by object")
+                st.markdown("#### Backup data by object")
                 st.dataframe(obj_df, use_container_width=True)
                 with open("workbooks/Backup - objects.xlsx", "rb") as file:
                     st.download_button(
@@ -79,7 +82,7 @@ else:
                     )
 
             with tab4:
-                st.markdown("#### Detailed last backup data by object")
+                st.markdown("#### Last backup data by object")
                 styled_df = last_obj_df.style.apply(highlight_error, axis=1)
                 st.dataframe(styled_df, use_container_width=True)
                 with open("workbooks/Last backup - objects.xlsx", "rb") as file:
@@ -125,7 +128,7 @@ else:
                 st.markdown("#### Summary of recent backups")
                 st.dataframe(summary_recent_df, hide_index=True, height=393, use_container_width=True)
 
-            col1, col2 = st.columns([0.65, 0.35], vertical_alignment="bottom")
+            col1, col2 = st.columns(2, vertical_alignment="bottom")
 
             with col1:
                 st.markdown("#### Largest backups")
@@ -153,11 +156,12 @@ else:
         with tab_three:
             backup, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
 
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Backup job status", "Error rate", "Others", "Performance", "Trends", "Duration", "Gantt chart"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Status", "Error rate", "Backup job averages", "Total size", "Backup size", "Performance", "Efficiency", "Duration", "Gantt chart"])
 
             with tab1:
                 status(backup)
                 status_by_backup(backup)
+                
             with tab2:
                 error(backup)
 
@@ -169,21 +173,45 @@ else:
                     error_hour(backup)
 
             with tab3:
-                size(backup)
-                efficiency(backup)
-                # heatmap(backup)
+                averages(backup)
 
             with tab4:
-                perfomance(backup)
+                size(backup)
 
             with tab5:
+                heatmap(backup)
                 daily_trends(backup)
                 hour_trends(backup)
 
-            # with tab6:
-                # duration_hist(backup)
-                # duration_bar(backup)
-                # duration_box(backup)
-            
+            with tab6:
+                perfomance(backup)
+
             with tab7:
+                efficiency(backup)
+            
+            with tab8:
+                duration_hist(backup)
+                duration_bar(backup)
+                duration_box(backup)
+
+            with tab9:
                 gantt(backup)
+
+        with tab_four:
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Status", "Error rate", "Object averages", "Total size", "Performance", "Trends", "Duration", "Gantt chart"])
+
+            with tab1:
+                status(obj_df)
+                status_by_obj(obj_df)
+
+            with tab2:
+                error_obj(obj_df)
+
+            with tab3:
+                error(backup)
+
+            with tab4:
+                size_obj(obj_df)
+
+            with tab5:
+                perfomance_obj(obj_df)
