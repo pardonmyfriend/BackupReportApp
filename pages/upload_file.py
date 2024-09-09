@@ -70,7 +70,7 @@ if 'uploaded_backup' in st.session_state and 'uploaded_obj' in st.session_state:
         st.session_state['file_reset'] = True
         st.switch_page("pages/upload_file.py")
 
-    if st.button(f'Next step: Adjust parameters :material/arrow_forward_ios:', use_container_width=True):
+    if st.button(f'Next step: Adjust parameters :material/arrow_forward_ios:', use_container_width=True, type='primary'):
         st.switch_page("pages/params.py")
 else:
     files = st.file_uploader("Choose Excel file with Veeam report", type=["xlsx"], accept_multiple_files=True)

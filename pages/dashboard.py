@@ -18,7 +18,7 @@ else:
         if st.button(":material/arrow_back_ios: Back: Adjust parameters", use_container_width=True):
             st.switch_page('pages/params.py')
     else:
-        with st.spinner("Uploading..."):
+        with st.spinner("Loading..."):
             backup_df = st.session_state['backup']
             obj_df = st.session_state['obj']
             execution_df =  st.session_state['execution']
@@ -38,6 +38,8 @@ else:
             smallest_backups = st.session_state['smallest_backups']
             details_df = st.session_state['details']
             merged_counts_df = st.session_state['merged_counts']
+
+            backup, obj, last_backup, last_obj = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
 
         tab_one, tab_two, tab_three, tab_four = st.tabs(["BACKUP DATA OVERVIEW", "BACKUP SUMMARY", "BACKUP ANALYTICS BY JOB", "BACKUP ANALYTICS BY OBJECT"])
 
@@ -152,10 +154,7 @@ else:
                     mime="application/vnd.ms-excel",
                     use_container_width=True
                 )
-
         with tab_three:
-            backup, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
-
             tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Status", "Error rate", "Total size", "Backup size", "Duration", "Speed", "Performance", "Reduction efficiency", "Gantt chart"])
 
             with tab1:
@@ -204,34 +203,33 @@ else:
 
             with tab9:
                 gantt(backup)
-
         with tab_four:
             tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Status", "Error rate", "Total size", "Duration", "Speed", "Performance", "Reduction efficiency"])
 
             with tab1:
-                status(obj_df)
-                status_by_obj(obj_df)
+                status(obj)
+                status_by_obj(obj)
 
             with tab2:
-                error_obj(obj_df)
+                error_obj(obj)
 
             with tab3:
-                avg_total_obj(obj_df)
-                size_obj(obj_df)
+                avg_total_obj(obj)
+                size_obj(obj)
 
             with tab4:
-                avg_duration_obj(obj_df)
-                duration_hist_obj(obj_df)
-                duration_box_obj(obj_df)
+                avg_duration_obj(obj)
+                duration_hist_obj(obj)
+                duration_box_obj(obj)
 
             with tab5:
-                avg_speed_obj(obj_df)
-                backup_speed_obj(obj_df)
-                speed_hist_obj(obj_df)
-                speed_box_obj(obj_df)
+                avg_speed_obj(obj)
+                backup_speed_obj(obj)
+                speed_hist_obj(obj)
+                speed_box_obj(obj)
 
             with tab6:
-                perfomance_obj(obj_df)
+                perfomance_obj(obj)
 
             with tab7:
-                efficiency_obj(obj_df)
+                efficiency_obj(obj)

@@ -48,7 +48,7 @@ else:
             st.session_state['params_reset'] = True
             st.switch_page("pages/params.py")
         
-        if st.button(f'Next step: View results :material/arrow_forward_ios:' , use_container_width=True):
+        if st.button(f'Next step: View results :material/arrow_forward_ios:' , use_container_width=True, type='primary'):
             st.switch_page("pages/dashboard.py")
     else:
         backup = st.session_state['backup']

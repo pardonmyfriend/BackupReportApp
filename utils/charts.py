@@ -5,6 +5,7 @@ import plotly.express as px
 import seaborn as sns
 import plotly.graph_objects as go
 from scipy.stats import gaussian_kde
+from plotly.subplots import make_subplots
 
 
 def highlight_error(row):
@@ -138,7 +139,7 @@ def plot_avg(df, x_col, title, x_label):
         xaxis_title=x_label,
         yaxis_title='Backup Job',
         showlegend=False,
-        height=600
+        height=600,
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -210,10 +211,23 @@ def heatmap(df):
     df_aggregated = df.groupby(['Date', 'Backup Job'])['Backup Size (GB)'].sum().reset_index()
 
     pivot_table = df_aggregated.pivot(index='Date', columns='Backup Job', values='Backup Size (GB)')
+    pivot_table.index = pd.to_datetime(pivot_table.index)
 
-    height = 60 * len(pivot_table.index)
+    longest_xtick_label = max([len(str(label)) for label in pivot_table.columns])
+
+    full = pd.date_range(start=pivot_table.index.min(), end=pivot_table.index.max())
+    missing_dates = full.difference(pivot_table.index)
+
+    missing_data = pd.DataFrame(index=missing_dates, columns=pivot_table.columns)
+    missing_data[:] = np.nan
+
+    pivot_table = pd.concat([pivot_table, missing_data])
+
+    pivot_table = pivot_table.sort_index()
 
     text_data = pivot_table.map(lambda x: '' if pd.isnull(x) else f'{x:.0f}')
+
+    st.write(pivot_table)
 
     fig = go.Figure(data=go.Heatmap(
         z=pivot_table.values,
@@ -236,7 +250,7 @@ def heatmap(df):
         yaxis=dict(autorange="reversed", showgrid=False),
         xaxis_nticks=len(pivot_table.columns),
         yaxis_nticks=len(pivot_table.index),
-        height=height
+        height=50 * len(pivot_table.index) + longest_xtick_label * 5
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -510,6 +524,10 @@ def speed_heatmap(df):
         heatmap_data[col] = np.nan
     heatmap_data = heatmap_data.fillna(np.nan)
 
+    for day in day_order:
+        if day not in heatmap_data.index:
+            heatmap_data.loc[day] = [np.nan] * len(heatmap_data.columns)
+
     heatmap_data = heatmap_data[sorted(heatmap_data.columns)]
 
     text_data = heatmap_data.map(lambda x: '' if pd.isnull(x) else f'{x:.1f}')
@@ -551,41 +569,52 @@ def perfomance(df):
         job_df = df[df['Backup Job'] == job]
         job_df = job_df.sort_values(by='Start Datetime')
 
-        col1, col2 = st.columns(2)
+        fig = make_subplots(rows=1, cols=2, 
+                            subplot_titles=(f'Backup Size, Data Read, Transferred', 
+                                            f'Dedupe and Compression'),
+                            shared_xaxes=True)
+        
+        fig.add_trace(go.Scatter(x=job_df['Start Datetime'], 
+                                 y=job_df['Backup Size (GB)'],
+                                 mode='lines+markers',
+                                 name='Backup Size (GB)',
+                                 marker=dict(color=palette[0])),
+                      row=1, col=1)
+        fig.add_trace(go.Scatter(x=job_df['Start Datetime'], 
+                                 y=job_df['Data Read (GB)'],
+                                 mode='lines+markers',
+                                 name='Data Read (GB)',
+                                 marker=dict(color=palette[1])),
+                      row=1, col=1)
+        fig.add_trace(go.Scatter(x=job_df['Start Datetime'], 
+                                 y=job_df['Transferred (GB)'],
+                                 mode='lines+markers',
+                                 name='Transferred (GB)',
+                                 marker=dict(color=palette[2])),
+                      row=1, col=1)
 
-        with col1:
-            fig1 = px.line(job_df, x='Start Datetime', 
-                        y=['Backup Size (GB)', 'Data Read (GB)', 'Transferred (GB)'],
-                        title=f'{job} - Backup Size, Data Read, Transferred',
-                        labels={'value': 'Size (GB)', 'variable': 'Metric'},
-                        markers=True,
-                        color_discrete_sequence=palette[:3])
+        fig.add_trace(go.Scatter(x=job_df['Start Datetime'], 
+                                 y=job_df['Dedupe'],
+                                 mode='lines+markers',
+                                 name='Dedupe',
+                                 marker=dict(color=palette[3])),
+                      row=1, col=2)
+        fig.add_trace(go.Scatter(x=job_df['Start Datetime'], 
+                                 y=job_df['Compression'],
+                                 mode='lines+markers',
+                                 name='Compression',
+                                 marker=dict(color=palette[4])),
+                      row=1, col=2)
+        
+        fig.update_layout(
+            title_text=job,
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0),
+        )
 
-            fig1.update_layout(
-                xaxis=dict(tickformat='%d-%m %H:%M', tickangle=30),
-                legend=dict(orientation="h", yanchor="top", y=-0.4, xanchor="left", x=0)
-            )
+        fig.update_xaxes(tickformat='%d-%m %H:%M', tickangle=30)
 
-            fig1.update_traces(hovertemplate='%{x}<br>%{y} GB')
-
-            st.plotly_chart(fig1, use_container_width=True)
-
-        with col2:
-            fig2 = px.line(job_df, x='Start Datetime', 
-                        y=['Dedupe', 'Compression'],
-                        title=f'{job} - Dedupe, Compression',
-                        labels={'value': 'Ratio', 'variable': 'Metric'},
-                        markers=True,
-                        color_discrete_sequence=palette[3:])
-
-            fig2.update_layout(
-                xaxis=dict(tickformat='%d-%m %H:%M', tickangle=30),
-                legend=dict(orientation="h", yanchor="top", y=-0.4, xanchor="left", x=0)
-            )
-
-            fig2.update_traces(hovertemplate='%{x}<br>%{y}x')
-
-            st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
 
 def efficiency(df):
