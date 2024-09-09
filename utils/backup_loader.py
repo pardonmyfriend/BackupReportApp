@@ -39,8 +39,8 @@ def report_summary(sheet):
         'Total Size': None,
         'Backup Size': None,
         'Data Read': None,
-        'Dedupe': None,
         'Transferred': None,
+        'Dedupe': None,
         'Compression': None
     }
 

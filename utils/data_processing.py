@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+import streamlit as st
     
 
 def convert_to_gb(size):
@@ -30,6 +31,9 @@ def remove_x_and_convert(value):
 def convert(df):
     df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
     df['Start Time'] = pd.to_datetime(df['Start Time'], format='%H:%M:%S')
+    for index, row in df.iterrows():
+        if isinstance(df.at[index, 'End Time'], str):
+            df.at[index, 'End Time'] = df.at[index, 'End Time'][:8]
     df['End Time'] = pd.to_datetime(df['End Time'], format='%H:%M:%S').dt.time
     df['Duration'] = df['Duration'].apply(lambda row: pd.to_timedelta(row.strftime('%H:%M:%S')))
 

@@ -13,11 +13,17 @@ def load_data(files):
     
     for file in files:
         workbook = load_workbook(file)
-        worksheet = workbook['Arkusz1']
-        backup, obj = report_summary(worksheet)
-        backup_list.append(backup)
-        obj_list.append(obj)
-        execution_list.append(get_backup_execution(worksheet))
+        sheet_names = workbook.sheetnames
+
+        for sheet_name in sheet_names:
+            sheet = workbook[sheet_name]
+            max_row = sheet.max_row
+            cell_value = sheet.cell(row=max_row, column=1).value
+            if cell_value and isinstance(cell_value, str) and "Veeam Backup & Replication" in cell_value:
+                backup, obj = report_summary(sheet)
+                backup_list.append(backup)
+                obj_list.append(obj)
+                execution_list.append(get_backup_execution(sheet))
 
     backup_df = combine(backup_list)
     obj_df = combine(obj_list)

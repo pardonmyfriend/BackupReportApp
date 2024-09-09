@@ -30,7 +30,13 @@ def status(df):
 
 
 def status_by_backup(df):
-    summary = df.groupby('Backup Job')[['Success', 'Warning', 'Error']].sum().reset_index()
+    status = df[['Backup Job', 'Status']]
+
+    status['Success'] = status['Status'].apply(lambda x: 1 if x == 'Success' else 0)
+    status['Warning'] = status['Status'].apply(lambda x: 1 if x == 'Warning' else 0)
+    status['Error'] = status['Status'].apply(lambda x: 1 if x == 'Error' else 0)
+
+    summary = status.groupby('Backup Job')[['Success', 'Warning', 'Error']].sum().reset_index()
     summary_long = summary.melt(id_vars='Backup Job', value_vars=['Success', 'Warning', 'Error'], 
                                 var_name='Status', value_name='Count')
 
@@ -226,8 +232,6 @@ def heatmap(df):
     pivot_table = pivot_table.sort_index()
 
     text_data = pivot_table.map(lambda x: '' if pd.isnull(x) else f'{x:.0f}')
-
-    st.write(pivot_table)
 
     fig = go.Figure(data=go.Heatmap(
         z=pivot_table.values,

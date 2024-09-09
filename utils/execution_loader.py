@@ -92,9 +92,9 @@ def get_backup_execution(sheet):
                 'Status': status
             }
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
-            day_of_week = replace_days(row[0].split(',')[0])
+            # day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
-            current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S').date()
+            current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S')
 
             month_first_day = current_entry['Date'].replace(day=1)
             days_from_first_monday = (current_entry['Date'] - month_first_day).days + month_first_day.weekday()
@@ -103,7 +103,8 @@ def get_backup_execution(sheet):
             month = current_entry['Date'].month
             current_entry['Month'] = month
             current_entry['Week Number'] = week_num
-            current_entry['Day of Week'] = day_of_week
+            current_entry['Day of Week'] = current_entry['Date'].strftime('%A')
+            current_entry['Date'] = current_entry['Date'].date()
         elif row[3] and row[2] == "Start time" and row[3] != "End time":
             start_time = row[3]
             if retry_num is None:
