@@ -156,7 +156,7 @@ else:
         with tab_three:
             backup, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
 
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Status", "Error rate", "Backup job averages", "Total size", "Backup size", "Performance", "Efficiency", "Duration", "Gantt chart"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Status", "Error rate", "Total size", "Backup size", "Duration", "Speed", "Performance", "Reduction efficiency", "Gantt chart"])
 
             with tab1:
                 status(backup)
@@ -173,32 +173,40 @@ else:
                     error_hour(backup)
 
             with tab3:
-                averages(backup)
+                avg_total(backup)
+                size(backup)
+                total_trends(backup)
 
             with tab4:
-                size(backup)
+                avg_backup(backup)
+                heatmap(backup)
+                backup_trends(backup)
 
             with tab5:
-                heatmap(backup)
-                daily_trends(backup)
-                hour_trends(backup)
+                avg_duration(backup)
+                duration_trends(backup)
+                duration_hist(backup)
+                duration_box(backup)
 
             with tab6:
-                perfomance(backup)
+                avg_speed(backup)
+                backup_speed(backup)
+                speed_hist(backup)
+                speed_box(backup)
+                speed_heatmap(backup)
 
             with tab7:
-                efficiency(backup)
-            
+                perfomance(backup)
+
             with tab8:
-                duration_hist(backup)
-                duration_bar(backup)
-                duration_box(backup)
+                efficiency(backup)
+
 
             with tab9:
                 gantt(backup)
 
         with tab_four:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Status", "Error rate", "Object averages", "Total size", "Performance", "Trends", "Duration", "Gantt chart"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Status", "Error rate", "Total size", "Duration", "Speed", "Performance", "Reduction efficiency"])
 
             with tab1:
                 status(obj_df)
@@ -208,10 +216,22 @@ else:
                 error_obj(obj_df)
 
             with tab3:
-                error(backup)
-
-            with tab4:
+                avg_total_obj(obj_df)
                 size_obj(obj_df)
 
+            with tab4:
+                avg_duration_obj(obj_df)
+                duration_hist_obj(obj_df)
+                duration_box_obj(obj_df)
+
             with tab5:
+                avg_speed_obj(obj_df)
+                backup_speed_obj(obj_df)
+                speed_hist_obj(obj_df)
+                speed_box_obj(obj_df)
+
+            with tab6:
                 perfomance_obj(obj_df)
+
+            with tab7:
+                efficiency_obj(obj_df)
