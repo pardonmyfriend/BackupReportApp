@@ -4,32 +4,33 @@ from datetime import timedelta, date
 import calendar
 
 
-st.header("Adjust parameters")
+st.header("Parameters")
 
 if 'backup' not in st.session_state:
-    st.warning(":material/warning: Data file not uploaded yet. Please upload your data file to set parameters.")
+    st.warning("Data file not uploaded yet. Please upload a data file to adjust the parameters.", icon=":material/warning:")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
-        st.switch_page('pages/upload_file.py')
+        st.switch_page('my_pages/file_upload.py')
 else:
     if 'params_reset' in st.session_state and st.session_state['params_reset']:
         del st.session_state['params_reset']
         del st.session_state['params_just_saved']
         del st.session_state['selected_date_range']
         del st.session_state['selected_job_obj']
-        del st.session_state['excels_generated']
+        if 'excels_generated' in st.session_state:
+            del st.session_state['excels_generated']
 
         st.session_state['backup'] = st.session_state['uploaded_backup']
         st.session_state['obj'] = st.session_state['uploaded_obj']
         st.session_state['execution'] = st.session_state['uploaded_execution']
 
-        st.success("Paremeters has been reset.")
+        st.info("Paremeters has been reset. You can now adjust the parameters again.", icon=":material/info:")
 
     if 'selected_date_range' in st.session_state and 'selected_job_obj' in st.session_state:
         if 'params_just_saved' in st.session_state and st.session_state['params_just_saved']:
-            st.success(":material/task_alt: Parameters successfully saved!")
+            st.success("Parameters successfully saved! Proceed to view the results.", icon=":material/task_alt:")
 
         if 'params_just_saved' in st.session_state and not st.session_state['params_just_saved']:
-            st.success(":material/task_alt: You've already adjusted parameters!")
+            st.info("You've already adjusted parameters. Proceed to view the results.", icon=":material/info:")
 
         st.session_state['params_just_saved'] = False
 
@@ -46,10 +47,10 @@ else:
 
         if st.button(f'Reset params', use_container_width=True):
             st.session_state['params_reset'] = True
-            st.switch_page("pages/params.py")
+            st.rerun()
         
         if st.button(f'Next step: View results :material/arrow_forward_ios:' , use_container_width=True, type='primary'):
-            st.switch_page("pages/dashboard.py")
+            st.switch_page("my_pages/dashboard.py")
     else:
         backup = st.session_state['backup']
         obj = st.session_state['obj']
@@ -154,7 +155,7 @@ else:
         selected_job_obj = {}
 
         container = st.container()
-        all = st.checkbox("Select all")
+        all = st.checkbox("Select all", value=True)
 
         with container:
             with st.expander("Select backup jobs"):
@@ -187,7 +188,7 @@ else:
         backup_df = backup_df[backup_df.set_index(['Date', 'Backup Job']).index.isin(unique_pairs.set_index(['Date', 'Backup Job']).index)]
         
         if backup_df.empty or obj_df.empty:
-            btn = st.button(f'Save', use_container_width=True, help=":material/warning: No data. Change selected date range or job obj.", disabled=True)
+            btn = st.button(f'Save', use_container_width=True, help=":material/warning: No data available for the selected parameters. Please change the date range or select different backup jobs.", disabled=True)
         else:
             if st.button(f'Save', use_container_width=True):
                 st.session_state['backup'] = backup_df
@@ -209,4 +210,4 @@ else:
                 st.session_state['selected_date_range'] = selected_date_range
                 st.session_state['selected_job_obj'] = selected_job_obj
                 st.session_state['params_just_saved'] = True
-                st.switch_page("pages/params.py")
+                st.rerun()

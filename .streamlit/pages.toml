@@ -1,19 +1,19 @@
 [[pages]]
-path = "pages/home.py"
+path = "my_pages/home.py"
 name = "Home"
 icon = ":material/home:"
 
 [[pages]]
-path = "pages/upload_file.py"
-name = "Upload file"
+path = "my_pages/file_upload.py"
+name = "File upload"
 icon = ":material/upload:"
 
 [[pages]]
-path = "pages/params.py"
-name = "Adjust parameters"
+path = "my_pages/params.py"
+name = "Parameters"
 icon = ":material/tune:"
 
 [[pages]]
-path = "pages/dashboard.py"
+path = "my_pages/dashboard.py"
 name = "Statistics & Visualizations"
 icon = ":material/finance:"

@@ -6,6 +6,7 @@ import seaborn as sns
 import plotly.graph_objects as go
 from scipy.stats import gaussian_kde
 from plotly.subplots import make_subplots
+import warnings
 
 
 def highlight_error(row):
@@ -31,10 +32,11 @@ def status(df):
 
 def status_by_backup(df):
     status = df[['Backup Job', 'Status']]
+    status = status.copy()
 
     status['Success'] = status['Status'].apply(lambda x: 1 if x == 'Success' else 0)
-    status['Warning'] = status['Status'].apply(lambda x: 1 if x == 'Warning' else 0)
-    status['Error'] = status['Status'].apply(lambda x: 1 if x == 'Error' else 0)
+    status.loc[:, 'Warning'] = status['Status'].apply(lambda x: 1 if x == 'Warning' else 0)
+    status.loc[:, 'Error'] = status['Status'].apply(lambda x: 1 if x == 'Error' else 0)
 
     summary = status.groupby('Backup Job')[['Success', 'Warning', 'Error']].sum().reset_index()
     summary_long = summary.melt(id_vars='Backup Job', value_vars=['Success', 'Warning', 'Error'], 
@@ -227,6 +229,7 @@ def heatmap(df):
     missing_data = pd.DataFrame(index=missing_dates, columns=pivot_table.columns)
     missing_data[:] = np.nan
 
+    warnings.simplefilter("ignore", category=FutureWarning)
     pivot_table = pd.concat([pivot_table, missing_data])
 
     pivot_table = pivot_table.sort_index()
@@ -518,7 +521,7 @@ def speed_heatmap(df):
     day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     df['Day of Week'] = pd.Categorical(df['Day of Week'], categories=day_order, ordered=True)
 
-    heatmap_data = df.pivot_table(values='Backup Speed (GB/min)', index='Day of Week', columns='Hour', aggfunc='mean')
+    heatmap_data = df.pivot_table(values='Backup Speed (GB/min)', index='Day of Week', columns='Hour', aggfunc='mean', observed=False)
 
     required_columns = set(range(24))
     existing_columns = set(heatmap_data.columns)

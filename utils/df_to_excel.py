@@ -3,6 +3,7 @@ from openpyxl import load_workbook, Workbook
 from utils.formatting import format_backup, format_execution
 from utils.stats import backup_stats
 import shutil
+import streamlit as st
 
 
 def adjust_column_widths(writer, dataframe, sheet_name):

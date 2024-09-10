@@ -14,7 +14,5 @@ st.markdown(
     """
 )
 
-# st.button(":material/construction:, :material/file_save:, :material/line_axis:, :material/finance:, :material/bar_chart_4_bars:, :material/bid_landscape:, :material/data_table:, :material/grouped_bar_chart:, :material/bar_chart:, :material/task_alt:, :material/error:, :material/earthquake:, :material/data_check:, :material/download_done:")
-
 if st.button("Start analysis: Upload file :material/arrow_forward_ios:", use_container_width=True, type='primary'):
-    st.switch_page("pages/upload_file.py")
+    st.switch_page("my_pages/file_upload.py")

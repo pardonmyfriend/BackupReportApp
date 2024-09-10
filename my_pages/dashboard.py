@@ -9,14 +9,14 @@ from utils.backup_loader import get_last_backups
 st.header("Statistics & Visualizations")
 
 if 'backup' not in st.session_state:
-    st.warning(":material/warning: Data file not uploaded yet. Please upload your data file to set parameters.")
+    st.warning("Data file not uploaded yet. Please upload a data file to view the results.", icon=":material/warning:")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
-        st.switch_page('pages/upload_file.py')
+        st.switch_page('my_pages/file_upload.py')
 else:
     if 'selected_date_range' not in st.session_state or 'selected_job_obj' not in st.session_state:
-        st.warning(":material/warning: Adjust parameters first.")
+        st.warning("Parameters not adjusted yet. Please adjust the parameters to view the results.", icon=":material/warning:")
         if st.button(":material/arrow_back_ios: Back: Adjust parameters", use_container_width=True):
-            st.switch_page('pages/params.py')
+            st.switch_page('my_pages/params.py')
     else:
         with st.spinner("Loading..."):
             backup_df = st.session_state['backup']
@@ -98,7 +98,7 @@ else:
 
             with tab5:
                 st.markdown("#### Weekly backup job execution and results")
-                styled_df = execution_df.fillna("").style.apply(highlight_error, axis=1)
+                styled_df = execution_df.fillna("").astype(str).style.apply(highlight_error, axis=1)
                 st.dataframe(styled_df, use_container_width=True)
                 with open("workbooks/Backup execution.xlsx", "rb") as file:
                     st.download_button(
@@ -124,11 +124,11 @@ else:
 
             with col1:
                 st.markdown("#### Summary of backups")
-                st.dataframe(summary_df, hide_index=True, height=393, use_container_width=True)
+                st.dataframe(summary_df.astype(str), hide_index=True, height=393, use_container_width=True)
 
             with col2:
                 st.markdown("#### Summary of recent backups")
-                st.dataframe(summary_recent_df, hide_index=True, height=393, use_container_width=True)
+                st.dataframe(summary_recent_df.astype(str), hide_index=True, height=393, use_container_width=True)
 
             col1, col2 = st.columns(2, vertical_alignment="bottom")
 
