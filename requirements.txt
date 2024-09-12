@@ -1,4 +1,5 @@
 streamlit
+st-pages
 numpy
 pandas
 scipy
