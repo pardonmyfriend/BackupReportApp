@@ -74,12 +74,7 @@ def auto_adjust_column_widths(sheet):
             sheet.column_dimensions[column].width = adjusted_width
 
 
-def backup_stats():
-    backup_df = st.session_state['backup']
-    obj_df = st.session_state['obj']
-    last_backup_df = st.session_state['last_backup']
-    last_obj_df = st.session_state['last_obj']
-
+def stats(backup_df, obj_df, last_backup_df, last_obj_df):
     backup_df, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
 
     general_summary = generate_summary(backup_df)
@@ -117,6 +112,10 @@ def backup_stats():
     df_no_error = backup_df[backup_df['Status'] != 'Error']
     smallest_backups = df_no_error.nsmallest(3, 'Backup Size (GB)')[['Backup Job', 'Backup Size (GB)']]
 
+    return summary_df, summary_recent_df, largest_backups, smallest_backups, df_details, merged_counts
+
+
+def stats_excel(summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df):
     wb = load_workbook('workbooks/Backup data overview.xlsx')
     if 'Summary' in wb.sheetnames:
         std = wb['Summary']
@@ -128,28 +127,21 @@ def backup_stats():
     ws['D1'] = "General Summary of Recent Backups"
     add_summary_to_sheet(ws, summary_recent_df, 2, 4)
     ws[f'A{len(summary_df) + 4}'] = "Largest Backups"
-    add_summary_to_sheet(ws, largest_backups, len(summary_df) + 5, 1)
+    add_summary_to_sheet(ws, largest_backups_df, len(summary_df) + 5, 1)
     ws[f'D{len(summary_df) + 4}'] = "Smallest Backups"
-    add_summary_to_sheet(ws, smallest_backups, len(summary_df) + 5, 4)
-    ws[f'A{len(summary_df) + len(largest_backups) + 7}'] = "Machine Backup Summary"
-    add_summary_to_sheet(ws, df_details, len(summary_df) + len(largest_backups) + 8, 1)
-    ws[f'A{len(summary_df) + len(largest_backups) + len(df_details) + 10}'] = "Machine Backup Error Rate"
-    add_summary_to_sheet(ws, merged_counts, len(summary_df) + len(largest_backups) + len(df_details) + 11, 1)
+    add_summary_to_sheet(ws, smallest_backups_df, len(summary_df) + 5, 4)
+    ws[f'A{len(summary_df) + len(largest_backups_df) + 7}'] = "Machine Backup Summary"
+    add_summary_to_sheet(ws, details_df, len(summary_df) + len(largest_backups_df) + 8, 1)
+    ws[f'A{len(summary_df) + len(largest_backups_df) + len(details_df) + 10}'] = "Machine Backup Error Rate"
+    add_summary_to_sheet(ws, merged_counts_df, len(summary_df) + len(largest_backups_df) + len(details_df) + 11, 1)
 
-    st.session_state['summary'] = summary_df
-    st.session_state['summary_recent'] = summary_recent_df
-    st.session_state['largest_backups'] = largest_backups
-    st.session_state['smallest_backups'] = smallest_backups
-    st.session_state['details'] = df_details
-    st.session_state['merged_counts'] = merged_counts
-
-    header_locs = [[1, 1, 2], [1, 4, 5], [14, 1, 2], [14, 4, 5], [20, 1, 4], [len(df_details) + 23, 1, 2]]
-    col_locs = [[2, 1, 2], [2, 4, 5], [15, 1, 2], [15, 4, 5], [21, 1, 4], [len(df_details) + 24, 1, 2]]
+    header_locs = [[1, 1, 2], [1, 4, 5], [14, 1, 2], [14, 4, 5], [20, 1, 4], [len(details_df) + 23, 1, 2]]
+    col_locs = [[2, 1, 2], [2, 4, 5], [15, 1, 2], [15, 4, 5], [21, 1, 4], [len(details_df) + 24, 1, 2]]
     border_locs = [
         (1, 12, 1, 2), (1, 12, 4, 5),
         (14, 18, 1, 2), (14, 18, 4, 5),
-        (20, len(df_details) + 21, 1, 4),
-        (len(df_details) + 23, 2 * len(df_details) + 24, 1, 2)
+        (20, len(details_df) + 21, 1, 4),
+        (len(details_df) + 23, 2 * len(details_df) + 24, 1, 2)
     ]
 
     for loc in header_locs:

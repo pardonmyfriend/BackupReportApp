@@ -1,7 +1,7 @@
 import pandas as pd
 from openpyxl import load_workbook, Workbook
 from utils.formatting import format_backup, format_execution
-from utils.stats import backup_stats
+from utils.stats import stats_excel
 import shutil
 import streamlit as st
 
@@ -44,7 +44,7 @@ def timedelta_to_hhmmss(td):
     return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
-def create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df):
+def create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df, summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df):
     output_path = 'workbooks/Backup data overview.xlsx'
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter", date_format="yyyy-mm-dd") as writer:
@@ -60,8 +60,8 @@ def create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df):
         adjust_column_widths(writer, last_obj_df, 'Last backup - objects')
         adjust_column_widths(writer, execution_df, 'Backup execution')
 
+    stats_excel(summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df)
     format_backup()
-    backup_stats()
     format_execution()
 
     original_file = "workbooks/Backup data overview.xlsx"

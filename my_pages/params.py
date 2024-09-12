@@ -16,8 +16,6 @@ else:
         del st.session_state['params_just_saved']
         del st.session_state['selected_date_range']
         del st.session_state['selected_job_obj']
-        if 'excels_generated' in st.session_state:
-            del st.session_state['excels_generated']
 
         st.session_state['backup'] = st.session_state['uploaded_backup']
         st.session_state['obj'] = st.session_state['uploaded_obj']
