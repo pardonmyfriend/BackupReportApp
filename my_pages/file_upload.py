@@ -82,8 +82,8 @@ if 'uploaded_backup' in st.session_state and 'uploaded_obj' in st.session_state:
     obj_df = st.session_state['uploaded_obj']
 
     tab1, tab2 = st.tabs(['Backup data', 'Detailed backup data by object'])
-    tab1.dataframe(backup_df)
-    tab2.dataframe(obj_df)
+    tab1.dataframe(backup_df.astype(str))
+    tab2.dataframe(obj_df.astype(str))
 
     if st.button('Reset data', use_container_width=True):
         st.session_state['file_reset'] = True

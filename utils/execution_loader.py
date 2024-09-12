@@ -1,7 +1,6 @@
 import re
 import pandas as pd
 from datetime import datetime
-import streamlit as st
 
 
 MONTHS_MAP = {

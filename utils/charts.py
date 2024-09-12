@@ -123,13 +123,13 @@ def plot_avg(df, x_col, title, x_label):
                  color_discrete_sequence=sns.color_palette("viridis", len(performance)).as_hex(),
                  title=title)
     
-    fig.update_traces(hovertemplate='%{x}') 
+    fig.update_traces(hovertemplate='%{x}')
     
     fig.update_layout(
         xaxis_title=x_label,
         yaxis_title='Backup Job',
         showlegend=False,
-        height=600,
+        height=600
     )
 
     return fig

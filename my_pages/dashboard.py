@@ -74,7 +74,7 @@ else:
 
             with tab1:
                 st.markdown("#### Backup data")
-                st.dataframe(backup_df, use_container_width=True)
+                st.dataframe(backup_df.astype(str), use_container_width=True)
                 with open("workbooks/Backup.xlsx", "rb") as file:
                     st.download_button(
                         label=":material/download: Download backup data",
@@ -86,7 +86,7 @@ else:
 
             with tab2:
                 st.markdown("#### Backup data by object")
-                st.dataframe(obj_df, use_container_width=True)
+                st.dataframe(obj_df.astype(str), use_container_width=True)
                 with open("workbooks/Backup - objects.xlsx", "rb") as file:
                     st.download_button(
                         label=":material/download: Download detailed data by object",
@@ -98,7 +98,7 @@ else:
 
             with tab3:
                 st.markdown("#### Last backup data")
-                styled_df = last_backup_df.style.apply(highlight_error, axis=1)
+                styled_df = last_backup_df.astype(str).style.apply(highlight_error, axis=1)
                 st.dataframe(styled_df, use_container_width=True)
                 with open("workbooks/Last backup.xlsx", "rb") as file:
                     st.download_button(
@@ -111,7 +111,7 @@ else:
 
             with tab4:
                 st.markdown("#### Last backup data by object")
-                styled_df = last_obj_df.style.apply(highlight_error, axis=1)
+                styled_df = last_obj_df.astype(str).style.apply(highlight_error, axis=1)
                 st.dataframe(styled_df, use_container_width=True)
                 with open("workbooks/Last backup - objects.xlsx", "rb") as file:
                     st.download_button(
