@@ -74,8 +74,6 @@ def auto_adjust_column_widths(sheet):
 
 
 def stats(backup_df, obj_df, last_backup_df, last_obj_df):
-    backup_df, obj_df, last_backup_df, last_obj_df = process_data(backup_df, obj_df, last_backup_df, last_obj_df)
-
     general_summary = generate_summary(backup_df)
     summary_df = pd.DataFrame(list(general_summary.items()), columns=['Metric', 'Value'])
 

@@ -32,14 +32,14 @@ def status_by_backup(df):
     summary_long = summary.melt(id_vars='Backup Job', value_vars=['Success', 'Warning', 'Error'], 
                                 var_name='Status', value_name='Count')
 
-    fig = px.bar(summary_long, x='Backup Job', y='Count', color='Status', 
+    fig = px.bar(summary_long, x='Count', y='Backup Job', color='Status', orientation='h',
                 color_discrete_map={'Success': '#66c2a5', 'Warning': '#fc8d62', 'Error': '#d53e4f'},
                 title='Backup Results for Jobs: Count of Successes, Warnings and Errors')
     
-    fig.update_traces(hovertemplate='%{x}<br>%{y}') 
+    fig.update_traces(hovertemplate='%{y}<br>%{x}') 
 
-    fig.update_xaxes(title_text='Backup Job', tickangle=-90)
-    fig.update_yaxes(title_text='Count')
+    fig.update_xaxes(title_text='Count')
+    fig.update_yaxes(title_text='Backup Job')
 
     fig.update_layout(
         height=600,
@@ -58,15 +58,16 @@ def error(df):
 
     colors = sns.color_palette("viridis", len(backup_stats)).as_hex()
 
-    fig = px.bar(backup_stats, x='Backup Job', y='Error Rate', 
+    fig = px.bar(backup_stats, x='Error Rate', y='Backup Job',
                 color='Backup Job', 
+                orientation='h',
                 title='Error Rate by Backup Job', 
                 color_discrete_sequence=colors)
     
-    fig.update_traces(hovertemplate='%{y}') 
+    fig.update_traces(hovertemplate='%{x}') 
 
     fig.update_layout(
-        xaxis={'tickangle': -90, 'automargin': True, 'tickmode': 'array', 'tickvals': backup_stats['Backup Job']},
+        yaxis={'tickvals': backup_stats['Backup Job']},
         height=600,
         showlegend=False
     )
@@ -380,16 +381,16 @@ def duration_box(df):
     avg_duration = df.groupby('Backup Job')['Duration'].mean().reset_index()
     avg_duration['Duration'] = avg_duration['Duration'].dt.total_seconds() / 60
 
-    fig = px.box(df, x='Backup Job', y='Duration (minutes)',
+    fig = px.box(df, x='Duration (minutes)', y='Backup Job',
                 title='Distribution of Backup Durations for Each Backup Job',
                 color='Backup Job',
+                orientation='h',
                 color_discrete_sequence=px.colors.sequential.Viridis
                 )
 
     fig.update_layout(
-        xaxis_title='Backup Job',
-        yaxis_title='Duration (minutes)',
-        xaxis_tickangle=-90,
+        xaxis_title='Duration (minutes)',
+        yaxis_title='Backup Job',
         showlegend=False,
         height=700
     )
@@ -472,16 +473,16 @@ def speed_hist(df):
 
 
 def speed_box(df):
-    fig = px.box(df, x='Backup Job', y='Backup Speed (GB/min)',
+    fig = px.box(df, x='Backup Speed (GB/min)', y='Backup Job',
                 title='Distribution of Backup Speed for Each Backup Job',
                 color='Backup Job',
+                orientation='h',
                 color_discrete_sequence=px.colors.sequential.Viridis
                 )
 
     fig.update_layout(
-        xaxis_title='Backup Job',
-        yaxis_title='Backup Speed (GB/min)',
-        xaxis_tickangle=-90,
+        xaxis_title='Backup Speed (GB/min)',
+        yaxis_title='Backup Job',
         showlegend=False,
         height=700
     )
@@ -543,6 +544,7 @@ def speed_heatmap(df):
 
 
 def perfomance(df):
+    figs = []
     backup_jobs = df['Backup Job'].unique()
     palette = sns.color_palette("bright", 5).as_hex()
 
@@ -595,7 +597,9 @@ def perfomance(df):
 
         fig.update_xaxes(tickformat='%d-%m %H:%M', tickangle=30)
 
-        return fig
+        figs.append(fig)
+
+    return figs
 
 
 def dedupe_efficiency(df):
@@ -640,14 +644,14 @@ def status_by_obj(df):
     summary_long = summary.melt(id_vars='Object', value_vars=['Success', 'Warning', 'Error'], 
                                 var_name='Status', value_name='Count')
 
-    fig = px.bar(summary_long, x='Object', y='Count', color='Status', 
+    fig = px.bar(summary_long, x='Count', y='Object', color='Status', orientation='h',
                 color_discrete_map={'Success': '#66c2a5', 'Warning': '#fc8d62', 'Error': '#d53e4f'},
                 title='Backup Results for Objects: Count of Successes, Warnings and Errors')
 
-    fig.update_traces(hovertemplate='%{x}<br>%{y}') 
+    fig.update_traces(hovertemplate='%{y}<br>%{x}') 
 
-    fig.update_xaxes(title_text='Object', tickangle=-90)
-    fig.update_yaxes(title_text='Count')
+    fig.update_xaxes(title_text='Count')
+    fig.update_yaxes(title_text='Object')
 
     fig.update_layout(
         height=600,
@@ -666,15 +670,16 @@ def error_obj(df):
 
     colors = sns.color_palette("viridis", len(backup_stats)).as_hex()
 
-    fig = px.bar(backup_stats, x='Object', y='Error Rate', 
+    fig = px.bar(backup_stats, x='Error Rate', y='Object', 
                 color='Object', 
+                orientation='h',
                 title='Error Rate by Object', 
                 color_discrete_sequence=colors)
     
-    fig.update_traces(hovertemplate='%{y}') 
+    fig.update_traces(hovertemplate='%{x}') 
 
     fig.update_layout(
-        xaxis={'tickangle': -90, 'automargin': True, 'tickmode': 'array', 'tickvals': backup_stats['Object']},
+        yaxis={'tickvals': backup_stats['Object']},
         height=600,
         showlegend=False
     )
@@ -774,16 +779,15 @@ def duration_box_obj(df):
     avg_duration = df.groupby('Object')['Duration'].mean().reset_index()
     avg_duration['Duration'] = avg_duration['Duration'].dt.total_seconds() / 60
 
-    fig = px.box(df, x='Object', y='Duration (minutes)',
+    fig = px.box(df, x='Duration (minutes)', y='Object', orientation='h',
                 title='Distribution of Backup Durations for Each Object',
                 color='Object',
                 color_discrete_sequence=px.colors.sequential.Viridis
                 )
 
     fig.update_layout(
-        xaxis_title='Object',
-        yaxis_title='Duration (minutes)',
-        xaxis_tickangle=-90,
+        xaxis_title='Duration (minutes)',
+        yaxis_title='Object',
         showlegend=False,
         height=700
     )
@@ -866,16 +870,15 @@ def speed_hist_obj(df):
 
 
 def speed_box_obj(df):
-    fig = px.box(df, x='Object', y='Backup Speed (GB/min)',
+    fig = px.box(df, x='Backup Speed (GB/min)', y='Object', orientation='h',
                 title='Distribution of Backup Speed for Each Object',
                 color='Object',
                 color_discrete_sequence=px.colors.sequential.Viridis
                 )
 
     fig.update_layout(
-        xaxis_title='Object',
-        yaxis_title='Backup Speed (GB/min)',
-        xaxis_tickangle=-90,
+        xaxis_title='Backup Speed (GB/min)',
+        yaxis_title='Object',
         showlegend=False,
         height=700
     )
@@ -884,6 +887,7 @@ def speed_box_obj(df):
 
 
 def perfomance_obj(df):
+    figs = []
     backup_objs = df['Object'].unique()
     palette = sns.color_palette("bright", 5).as_hex()
 
@@ -906,7 +910,9 @@ def perfomance_obj(df):
             legend=dict(orientation="h", yanchor="top", y=-0.4, xanchor="left", x=0)
         )
 
-        return fig
+        figs.append(fig)
+
+    return figs
 
 
 # def heatmap_obj(df):

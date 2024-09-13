@@ -1,45 +1,30 @@
 import re
 import pandas as pd
 from datetime import datetime
+from utils.backup_loader import MONTHS_MAP, replace_months
+from dateutil import parser
 
 
-MONTHS_MAP = {
-    'stycznia': 'January',
-    'lutego': 'February',
-    'marca': 'March',
-    'kwietnia': 'April',
-    'maja': 'May',
-    'czerwca': 'June',
-    'lipca': 'July',
-    'sierpnia': 'August',
-    'września': 'September',
-    'października': 'October',
-    'listopada': 'November',
-    'grudnia': 'December'
-}
-
-
-DAYS_MAP = {
-    "poniedziałek": "Monday",
-    "wtorek": "Tuesday",
-    "środa": "Wednesday",
-    "czwartek": "Thursday",
-    "piątek": "Friday",
-    "sobota": "Saturday",
-    "niedziela": "Sunday"
-}
+# MONTHS_MAP = {
+#     'stycznia': 'January',
+#     'lutego': 'February',
+#     'marca': 'March',
+#     'kwietnia': 'April',
+#     'maja': 'May',
+#     'czerwca': 'June',
+#     'lipca': 'July',
+#     'sierpnia': 'August',
+#     'września': 'September',
+#     'października': 'October',
+#     'listopada': 'November',
+#     'grudnia': 'December'
+# }
 
 
 def replace_months(date_str):
     for key, value in MONTHS_MAP.items():
         date_str = date_str.replace(key, value)
     return date_str
-
-
-def replace_days(day):
-    for key, value in DAYS_MAP.items():
-        day = day.replace(key, value)
-    return day
 
 
 def merge_retry_rows(df):
@@ -93,7 +78,9 @@ def get_backup_execution(sheet):
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
             # day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
-            current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S')
+            parsed_date = parser.parse(date_str, dayfirst=True)
+            current_entry['Date'] = parsed_date
+            # current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S')
 
             month_first_day = current_entry['Date'].replace(day=1)
             days_from_first_monday = (current_entry['Date'] - month_first_day).days + month_first_day.weekday()

@@ -42,7 +42,7 @@ def highlight_error(row):
 
 st.header("Statistics & Visualizations")
 
-if 'backup' not in st.session_state:
+if 'uploaded_backup' not in st.session_state:
     st.warning("Data file not uploaded yet. Please upload a data file to view the results.", icon=":material/warning:")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
         st.switch_page('my_pages/file_upload.py')
@@ -56,14 +56,19 @@ else:
             backup_df = st.session_state['backup']
             obj_df = st.session_state['obj']
             execution_df =  st.session_state['execution']
+            selected_job_obj = st.session_state['selected_job_obj']
 
-            last_backup_df, last_obj_df = get_last_backups_cached(backup_df, obj_df)
+            last_backup_df, last_obj_df = get_last_backups_cached(st.session_state['uploaded_backup'], st.session_state['uploaded_obj'])
 
-            summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df = stats_cached(backup_df, obj_df, last_backup_df, last_obj_df)
-
-            create_excels_cached(backup_df, obj_df, last_backup_df, last_obj_df, execution_df, summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df)
+            last_obj_df = last_obj_df[last_obj_df.apply(lambda row: row['Object'] in selected_job_obj.get(row['Backup Job'], []), axis=1)]
+            unique_pairs = last_obj_df[['Date', 'Backup Job']].drop_duplicates()
+            last_backup_df = last_backup_df[last_backup_df.set_index(['Date', 'Backup Job']).index.isin(unique_pairs.set_index(['Date', 'Backup Job']).index)]
 
             backup, obj, last_backup, last_obj = process_data_cached(backup_df, obj_df, last_backup_df, last_obj_df)
+
+            summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df = stats_cached(backup, obj, last_backup, last_obj)
+
+            create_excels_cached(backup_df, obj_df, last_backup_df, last_obj_df, execution_df, summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df)
 
             charts = generate_all_charts_cached(backup, obj)
 
@@ -241,7 +246,8 @@ else:
                 st.plotly_chart(charts['speed_heatmap'], use_container_width=True)
 
             with tab7:
-                st.plotly_chart(charts['performance'], use_container_width=True)
+                for fig in charts['performance']:
+                    st.plotly_chart(fig, use_container_width=True)
 
             with tab8:
                 st.plotly_chart(charts['dedupe_efficiency'], use_container_width=True)
@@ -276,7 +282,8 @@ else:
                 st.plotly_chart(charts['speed_box_obj'], use_container_width=True)
 
             with tab6:
-                st.plotly_chart(charts['perfomance_obj'], use_container_width=True)
+                for fig in charts['perfomance_obj']:
+                    st.plotly_chart(fig, use_container_width=True)
 
             with tab7:
                 st.plotly_chart(charts['efficiency_obj'], use_container_width=True)

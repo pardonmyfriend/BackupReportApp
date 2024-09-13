@@ -1,21 +1,21 @@
 import pandas as pd
-from datetime import datetime
 import re
+from dateutil import parser
 
 
 MONTHS_MAP = {
-    'stycznia': 'January',
-    'lutego': 'February',
-    'marca': 'March',
-    'kwietnia': 'April',
-    'maja': 'May',
-    'czerwca': 'June',
-    'lipca': 'July',
-    'sierpnia': 'August',
-    'września': 'September',
-    'października': 'October',
-    'listopada': 'November',
-    'grudnia': 'December'
+    'stycznia': 'January', 'styczeń': 'January',
+    'lutego': 'February', 'luty': 'February',
+    'marca': 'March', 'marzec': 'March',
+    'kwietnia': 'April', 'kwiecień': 'April',
+    'maja': 'May', 'maj': 'May',
+    'czerwca': 'June', 'czerwiec': 'June',
+    'lipca': 'July', 'lipiec': 'July',
+    'sierpnia': 'August', 'sierpień': 'August',
+    'września': 'September', 'wrzesień': 'September',
+    'października': 'October', 'październik': 'October',
+    'listopada': 'November', 'listopad': 'November',
+    'grudnia': 'December', 'grudzień': 'December'
 }
 
 
@@ -89,7 +89,8 @@ def report_summary(sheet):
             })
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
             date_str = replace_months(row[0].split(',')[-1].strip())
-            backup_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S').date()
+            parsed_date = parser.parse(date_str, yearfirst=True)
+            backup_entry['Date'] = parsed_date.date()
             backup_jobs_list.append(backup_entry)
         elif row[0] and row[0] == "Details":
             details_section = True

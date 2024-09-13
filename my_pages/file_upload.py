@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from openpyxl import load_workbook
 import locale
-from utils.backup_loader import report_summary, get_last_backups, get_job_objects, combine
+from utils.backup_loader import report_summary, get_job_objects, combine
 from utils.execution_loader import get_backup_execution, merge_retry_rows, combine_exec
 
 
@@ -30,18 +30,12 @@ def load_data(files):
         obj_df = combine(obj_list)
         execution_df = merge_retry_rows(combine_exec(execution_list))
 
-        last_backup_df, last_obj_df = get_last_backups(backup_df, obj_df)
         job_obj = get_job_objects(backup_df, obj_df)
 
         st.session_state['uploaded_backup'] = backup_df
         st.session_state['uploaded_obj'] = obj_df
         st.session_state['uploaded_execution'] = execution_df
 
-        st.session_state['backup'] = backup_df
-        st.session_state['obj'] = obj_df
-        st.session_state['execution'] = execution_df
-        st.session_state['last_backup'] = last_backup_df
-        st.session_state['last_obj'] = last_obj_df
         st.session_state['job_obj'] = job_obj
 
         st.session_state['min_date'] = backup_df.loc[0, 'Date']
@@ -69,7 +63,7 @@ if 'report_not_found' in st.session_state and st.session_state['report_not_found
 
     st.session_state['file_uploader_key'] += 1
 
-if 'uploaded_backup' in st.session_state and 'uploaded_obj' in st.session_state:
+if 'uploaded_backup' in st.session_state:
     if 'file_just_loaded' in st.session_state and st.session_state['file_just_loaded']:
         st.success("File successfully uploaded! Proceed to adjust the parameters.", icon=":material/task_alt:")
 

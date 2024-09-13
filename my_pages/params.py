@@ -6,7 +6,7 @@ import calendar
 
 st.header("Parameters")
 
-if 'backup' not in st.session_state:
+if 'uploaded_backup' not in st.session_state:
     st.warning("Data file not uploaded yet. Please upload a data file to adjust the parameters.", icon=":material/warning:")
     if st.button(":material/arrow_back_ios: Back: Upload file", use_container_width=True):
         st.switch_page('my_pages/file_upload.py')
@@ -16,10 +16,6 @@ else:
         del st.session_state['params_just_saved']
         del st.session_state['selected_date_range']
         del st.session_state['selected_job_obj']
-
-        st.session_state['backup'] = st.session_state['uploaded_backup']
-        st.session_state['obj'] = st.session_state['uploaded_obj']
-        st.session_state['execution'] = st.session_state['uploaded_execution']
 
         st.info("Paremeters has been reset. You can now adjust the parameters again.", icon=":material/info:")
 
@@ -50,11 +46,7 @@ else:
         if st.button(f'Next step: View results :material/arrow_forward_ios:' , use_container_width=True, type='primary'):
             st.switch_page("my_pages/dashboard.py")
     else:
-        backup = st.session_state['backup']
-        obj = st.session_state['obj']
-        last_backup = st.session_state['last_backup']
-        last_obj = st.session_state['last_obj']
-        execution = st.session_state['execution']
+        execution_df = st.session_state['uploaded_execution']
 
         year = st.session_state['year']
         min_date = st.session_state['min_date']
@@ -73,7 +65,7 @@ else:
                 )
             
         elif option == "Month and week":
-            month_week = get_month_week(execution)
+            month_week = get_month_week(execution_df)
 
             c1, c2 = st.columns(2)
 
@@ -91,7 +83,7 @@ else:
             selected_date_range = get_week_dates(year, selected_month, selected_week)
 
         elif option == "Day range in month":
-            months = get_month_week(execution).keys()
+            months = get_month_week(execution_df).keys()
 
             c1, c2, c3 = st.columns(3)
 
@@ -106,7 +98,7 @@ else:
         
         elif option == "Predefined date ranges":
             year = st.session_state['year']
-            month_week = get_month_week(execution)
+            month_week = get_month_week(execution_df)
             month_week_tuples = [(key, element) for key, values in month_week.items() for element in values]
 
             c1, c2 = st.columns([3, 1], vertical_alignment="bottom")
@@ -173,8 +165,8 @@ else:
                         for job in selected_jobs:
                             selected_job_obj[job] = st.multiselect(f"Select machines from {job}", options=job_obj[job], default=job_obj[job])
 
-        backup_df = st.session_state['backup']
-        obj_df = st.session_state['obj']
+        backup_df = st.session_state['uploaded_backup']
+        obj_df = st.session_state['uploaded_obj']
 
         start_date = selected_date_range[0]
         end_date = selected_date_range[1]
@@ -191,19 +183,7 @@ else:
             if st.button(f'Save', use_container_width=True):
                 st.session_state['backup'] = backup_df
                 st.session_state['obj'] = obj_df
-
-                execution_df = st.session_state['execution']
-                last_backup_df = st.session_state['last_backup']
-                last_obj_df = st.session_state['last_obj']
-
-                execution_df = execution_df[execution_df['Backup Job'].isin(selected_job_obj.keys())]
-                last_obj_df = last_obj_df[last_obj_df.apply(lambda row: row['Object'] in selected_job_obj.get(row['Backup Job'], []), axis=1)]
-                unique_pairs = last_obj_df[['Date', 'Backup Job']].drop_duplicates()
-                last_backup_df = last_backup_df[last_backup_df.set_index(['Date', 'Backup Job']).index.isin(unique_pairs.set_index(['Date', 'Backup Job']).index)]
-
-                st.session_state['execution'] = execution_df
-                st.session_state['last_backup'] = last_backup_df
-                st.session_state['last_obj'] = last_obj_df
+                st.session_state['execution'] = execution_df[execution_df['Backup Job'].isin(selected_job_obj.keys())]
 
                 st.session_state['selected_date_range'] = selected_date_range
                 st.session_state['selected_job_obj'] = selected_job_obj
