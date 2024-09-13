@@ -1,5 +1,5 @@
 # BackupReportApp
-A Streamlit application for analyzing and visualizing backup reports. Provides a dashboard with insights into backup performance.
+A Streamlit application for analyzing and visualizing backup reports sourced from Veeam Backup & Replication. Provides a dashboard with insights into backup performance.
 
 ## Description
 
@@ -42,5 +42,6 @@ streamlit run app.py
 
 ## Usage
 
-1. Upload your backup report files using the upload feature.
+1. Upload your backup report files in Excel format, ensuring they are generated from the Veeam Backup & Replication application.
+3. Customize your analysis by selecting a date range and filtering the backup jobs or virtual machines you're interested in.
 2. View the generated dashboard to analyze backup performance.
