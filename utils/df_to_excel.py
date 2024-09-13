@@ -3,6 +3,7 @@ from openpyxl import load_workbook, Workbook
 from utils.formatting import format_backup, format_execution
 from utils.stats import stats_excel
 import shutil
+import os
 
 
 def adjust_column_widths(writer, dataframe, sheet_name):
@@ -44,7 +45,11 @@ def timedelta_to_hhmmss(td):
 
 
 def create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df, summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df):
-    output_path = 'workbooks/Backup data overview.xlsx'
+    output_folder = 'workbooks'
+    output_path = os.path.join(output_folder, 'Backup data overview.xlsx')
+    
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter", date_format="yyyy-mm-dd") as writer:
         backup_df.to_excel(writer, sheet_name='Backup', index=False)
