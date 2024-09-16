@@ -13,6 +13,7 @@ def get_month_week(execution):
 
     return month_week
 
+
 def get_week_dates(year, month, week):
     month_start = pd.Timestamp(f'{year}-{month:02d}-01')
 
@@ -33,6 +34,7 @@ def get_week_dates(year, month, week):
         week_end = month_start + pd.offsets.MonthEnd(0)
     
     return week_start.date(), week_end.date()
+
 
 def get_days_for_month(year, month, min_date, max_date):
     min_day = pd.Timestamp(min_date)

@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from dateutil import parser
+import streamlit as st
 
 
 MONTHS_MAP = {
@@ -26,6 +27,8 @@ def replace_months(date_str):
 
 
 def report_summary(sheet):
+    errors = []
+
     backup_entry_template = {
         'Date': None,
         'Backup Job': None,
@@ -89,9 +92,13 @@ def report_summary(sheet):
             })
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
             date_str = replace_months(row[0].split(',')[-1].strip())
-            parsed_date = parser.parse(date_str, yearfirst=True)
-            backup_entry['Date'] = parsed_date.date()
-            backup_jobs_list.append(backup_entry)
+            try:
+                parsed_date = parser.parse(date_str, yearfirst=True)
+                backup_entry['Date'] = parsed_date.date()
+                backup_jobs_list.append(backup_entry)
+            except ValueError as e:
+                errors.append(e)
+                continue
         elif row[0] and row[0] == "Details":
             details_section = True
         elif row[0] and details_section and row[0] != 'Name':
@@ -112,7 +119,9 @@ def report_summary(sheet):
 
     backup_df, obj_df = pd.DataFrame(backup_jobs_list), pd.DataFrame(details_list)
 
-    return backup_df, obj_df
+    backup_df, obj_df = backup_df.dropna().reset_index(drop=True), obj_df.dropna().reset_index(drop=True)
+
+    return backup_df, obj_df, errors
 
 
 def get_last_backups(backups, backups_obj):

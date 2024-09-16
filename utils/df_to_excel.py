@@ -13,37 +13,6 @@ def adjust_column_widths(writer, dataframe, sheet_name):
         worksheet.set_column(idx, idx, max_len)
 
 
-def copy_sheet_to_new_workbook(source_workbook, sheet_name, output_path):
-    source_wb = load_workbook(source_workbook)
-    source_sheet = source_wb[sheet_name]
-
-    new_wb = Workbook()
-
-    default_sheet = new_wb.active
-    new_wb.remove(default_sheet)
-
-    new_sheet = new_wb.copy_worksheet(source_sheet)
-    new_sheet.title = sheet_name
-
-    new_wb.save(output_path)
-
-def save_all_sheets_as_individual_files(workbook_path, output_directory):
-    source_wb = load_workbook(workbook_path)
-    
-    for sheet_name in source_wb.sheetnames:
-        output_path = f"{output_directory}/{sheet_name}.xlsx"
-        copy_sheet_to_new_workbook(workbook_path, sheet_name, output_path)
-
-
-def timedelta_to_hhmmss(td):
-    total_seconds = int(td.total_seconds())
-    hours = total_seconds // 3600
-    remaining_seconds = total_seconds - (hours * 3600)
-    minutes = remaining_seconds // 60
-    seconds = remaining_seconds % 60
-    return f"{hours:02}:{minutes:02}:{seconds:02}"
-
-
 def create_excels(backup_df, obj_df, last_backup_df, last_obj_df, execution_df, summary_df, summary_recent_df, largest_backups_df, smallest_backups_df, details_df, merged_counts_df):
     output_folder = 'workbooks'
     output_path = os.path.join(output_folder, 'Backup data overview.xlsx')

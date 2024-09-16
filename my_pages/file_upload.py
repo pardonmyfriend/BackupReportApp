@@ -7,6 +7,7 @@ from utils.execution_loader import get_backup_execution, merge_retry_rows, combi
 
 
 def load_data(files):
+    st.session_state['errors'] = []
     backup_list = []
     obj_list = []
     execution_list = []
@@ -20,10 +21,14 @@ def load_data(files):
             max_row = sheet.max_row
             cell_value = sheet.cell(row=max_row, column=1).value
             if cell_value and isinstance(cell_value, str) and "Veeam Backup & Replication" in cell_value:
-                backup, obj = report_summary(sheet)
+                backup, obj, errors = report_summary(sheet)
                 backup_list.append(backup)
                 obj_list.append(obj)
                 execution_list.append(get_backup_execution(sheet))
+
+                if errors:
+                    for error in errors:
+                        st.session_state['errors'].append(f"Error in file '{file.name}', sheet '{sheet_name}': {str(error)}")
 
     if backup_list:
         backup_df = combine(backup_list)
@@ -69,6 +74,12 @@ if 'uploaded_backup' in st.session_state:
 
     if 'file_just_loaded' in st.session_state and not st.session_state['file_just_loaded']:
         st.info("You've already uploaded your file. Proceed to adjust the parameters.", icon=":material/info:")
+
+    if 'errors' in st.session_state and st.session_state['errors']:
+        with st.expander('Errors'):
+            for error in st.session_state['errors']:
+                st.error(error)
+        del st.session_state['errors']
 
     st.session_state['file_just_loaded'] = False
 

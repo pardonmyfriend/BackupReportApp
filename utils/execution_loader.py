@@ -1,30 +1,9 @@
 import re
 import pandas as pd
 from datetime import datetime
-from utils.backup_loader import MONTHS_MAP, replace_months
+from utils.backup_loader import replace_months
 from dateutil import parser
-
-
-# MONTHS_MAP = {
-#     'stycznia': 'January',
-#     'lutego': 'February',
-#     'marca': 'March',
-#     'kwietnia': 'April',
-#     'maja': 'May',
-#     'czerwca': 'June',
-#     'lipca': 'July',
-#     'sierpnia': 'August',
-#     'września': 'September',
-#     'października': 'October',
-#     'listopada': 'November',
-#     'grudnia': 'December'
-# }
-
-
-def replace_months(date_str):
-    for key, value in MONTHS_MAP.items():
-        date_str = date_str.replace(key, value)
-    return date_str
+import streamlit as st
 
 
 def merge_retry_rows(df):
@@ -76,21 +55,24 @@ def get_backup_execution(sheet):
                 'Status': status
             }
         elif row[0] and re.search(r"\d{1,2}:\d{2}:\d{2}", row[0]):
-            # day_of_week = replace_days(row[0].split(',')[0])
             date_str = replace_months(row[0].split(',')[-1].strip())
-            parsed_date = parser.parse(date_str, dayfirst=True)
-            current_entry['Date'] = parsed_date
-            # current_entry['Date'] = datetime.strptime(date_str, '%d %B %Y %H:%M:%S')
 
-            month_first_day = current_entry['Date'].replace(day=1)
-            days_from_first_monday = (current_entry['Date'] - month_first_day).days + month_first_day.weekday()
-            week_num = days_from_first_monday // 7 + 1
+            try:
+                parsed_date = parser.parse(date_str, dayfirst=True)
+                current_entry['Date'] = parsed_date
 
-            month = current_entry['Date'].month
-            current_entry['Month'] = month
-            current_entry['Week Number'] = week_num
-            current_entry['Day of Week'] = current_entry['Date'].strftime('%A')
-            current_entry['Date'] = current_entry['Date'].date()
+                month_first_day = current_entry['Date'].replace(day=1)
+                days_from_first_monday = (current_entry['Date'] - month_first_day).days + month_first_day.weekday()
+                week_num = days_from_first_monday // 7 + 1
+
+                month = current_entry['Date'].month
+                current_entry['Month'] = month
+                current_entry['Week Number'] = week_num
+                current_entry['Day of Week'] = current_entry['Date'].strftime('%A')
+                current_entry['Date'] = current_entry['Date'].date()
+            except ValueError:
+                continue
+
         elif row[3] and row[2] == "Start time" and row[3] != "End time":
             start_time = row[3]
             if retry_num is None:
@@ -107,7 +89,14 @@ def get_backup_execution(sheet):
                 'Backup Job': current_job,
                 'Status': None
             }
+
     df = pd.DataFrame(backup_jobs)
+
+    st.dataframe(df)
+
+    df = df.dropna(subset=df.columns[:7]).reset_index(drop=True)
+
+    st.dataframe(df)
 
     for row in range(len(df)):
         for col in df.columns[6:]:

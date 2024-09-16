@@ -603,7 +603,8 @@ def perfomance(df):
 
 
 def dedupe_efficiency(df):
-    fig = px.scatter(df, x='Backup Size (GB)', y='Dedupe', color='Backup Job', 
+    df_jobs = df.groupby('Backup Job')[['Backup Size (GB)', 'Dedupe']].mean().reset_index()
+    fig = px.scatter(df_jobs, x='Backup Size (GB)', y='Dedupe', color='Backup Job', 
                     title='Efficiency of Deduplication vs Backup Size',
                     labels={'Backup Size (GB)': 'Backup Size (GB)', 'Dedupe': 'Dedupe Ratio'})
     
@@ -613,7 +614,8 @@ def dedupe_efficiency(df):
 
 
 def compression_efficiency(df):
-    fig = px.scatter(df, x='Backup Size (GB)', y='Compression', color='Backup Job', 
+    df_jobs = df.groupby('Backup Job')[['Backup Size (GB)', 'Compression']].mean().reset_index()
+    fig = px.scatter(df_jobs, x='Backup Size (GB)', y='Compression', color='Backup Job', 
                     title='Efficiency of Compression vs Backup Size',
                     labels={'Backup Size (GB)': 'Backup Size (GB)', 'Compression': 'Compression Ratio'})
 
